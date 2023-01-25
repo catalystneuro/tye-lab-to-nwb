@@ -17,6 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Cody Baker, Ben Dichter and Szonja Weigl.",
     email="ben.dichter@catalystneuro.com",
+    url="https://github.com/catalystneuro/tye-lab-to-nwb",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
