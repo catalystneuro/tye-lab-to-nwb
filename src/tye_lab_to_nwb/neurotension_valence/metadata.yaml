@@ -27,3 +27,5 @@ NWBFile:
   lab: Tye Lab
   experimenter:
     - Li, Hao
+Subject:
+  species: Mus musculus
