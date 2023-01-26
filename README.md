@@ -1,33 +1,96 @@
-# Using this template
-
-This repo serves as a generic template for all conversion projects undertaken by the CatalystNeuro team. You can easily use this by...
-
-Creating a new project under the CatalystNeuro umbrella (or fork this repo and use it for your personal repos)...
-
-![image](https://user-images.githubusercontent.com/51133164/167436507-8b30ca9d-588c-4941-8385-bdff050f6558.png)
+# tye-lab-to-nwb
+NWB conversion scripts for Tye lab data to the [Neurodata Without Borders](https://nwb-overview.readthedocs.io/) data format.
 
 
-Select this template at the top...
+## Installation
+## Basic installation
 
-![image](https://user-images.githubusercontent.com/51133164/167436692-670480f1-216d-4cac-a1b3-76ad518ec2f6.png)
-
-
-
-# Setting up pre-commit bot
-
-For new repos, an extra step of allowing the black auto-commit CI bot may have to be enabled at: https://results.pre-commit.ci/
-
-
-
-# Dataset-specific environments
-
-If the conversion involves multiple very different datasets collected over several years it is recommended to have separate environments for each dataset to reconcile dependency conflicts, instead of attempting to either keep old conversions up to date with recent upstream changes or using strong version pinning at the outer level `my-lab-to-nwb` requirements.
-
-These environments can be easily made by simply calling
+You can install the latest release of the package with pip:
 
 ```
-conda create name_of_environment_file.yml
-conda activate name-of-environment
+pip install tye-lab-to-nwb
 ```
 
-Of course, if the conversion is sufficiently simple feel free to keep dependencies at the outermost level.
+We recommend that you install the package inside a [virtual environment](https://docs.python.org/3/tutorial/venv.html). A simple way of doing this is to use a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) from the `conda` package manager ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)). Detailed instructions on how to use conda environments can be found in their [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+
+### Running a specific conversion
+Once you have installed the package with pip, you can run any of the conversion scripts in a notebook or a python file:
+
+https://github.com/catalystneuro/tye-lab-to-nwb//tree/main/src/neurotensin_valence/neurotensin_valence_conversion_script.py
+
+
+
+
+## Installation from Github
+Another option is to install the package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences. To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains all the required machinery in a single and simple instal
+
+From a terminal (note that conda should install one in your system) you can do the following:
+
+```
+git clone https://github.com/catalystneuro/tye-lab-to-nwb
+cd tye-lab-to-nwb
+conda env create --file make_env.yml
+conda activate tye-lab-to-nwb-env
+```
+
+This creates a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) which isolates the conversion code from your system libraries.  We recommend that you run all your conversion related tasks and analysis from the created environment in order to minimize issues related to package dependencies.
+
+Alternatively, if you want to avoid conda altogether (for example if you use another virtual environment tool) you can install the repository with the following commands using only pip:
+
+```
+git clone https://github.com/catalystneuro/tye-lab-to-nwb
+cd tye-lab-to-nwb
+pip install -e .
+```
+
+Note:
+both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs).
+
+### Running a specific conversion
+To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
+```
+pip install -r src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_requirements.txt 
+```
+
+You can run a specific conversion with the following command:
+```
+python src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_conversion_script.py
+```
+
+## Repository structure
+Each conversion is organized in a directory of its own in the `src` directory:
+
+    tye-lab-to-nwb/
+    ├── LICENSE
+    ├── make_env.yml
+    ├── pyproject.toml
+    ├── README.md
+    ├── requirements.txt
+    ├── setup.py
+    └── src
+        ├── tye_lab_to_nwb
+        │   ├── conversion_directory_1
+        │   └── neurotensin_valence
+        │       ├── neurotensin_valencebehaviorinterface.py
+        │       ├── neurotensin_valence_convert_session.py
+        │       ├── neurotensin_valence_metadata.yml
+        │       ├── neurotensin_valencenwbconverter.py
+        │       ├── neurotensin_valence_requirements.txt
+        │       ├── neurotensin_valence_notes.md
+
+        │       └── __init__.py
+        │   ├── conversion_directory_b
+
+        └── __init__.py
+
+ For example, for the conversion `neurotensin_valence` you can find a directory located in `src/tye-lab-to-nwb/neurotensin_valence`. Inside each conversion directory you can find the following files:
+
+* `neurotensin_valence_convert_sesion.py`: this script defines the function to convert one full session of the conversion. 
+* `neurotensin_valence_requirements.txt`: dependencies specific to this conversion.
+* `neurotensin_valence_metadata.yml`: metadata in yaml format for this specific conversion.
+* `neurotensin_valencebehaviorinterface.py`: the behavior interface. Usually ad-hoc for each conversion.
+* `neurotensin_valencenwbconverter.py`: the place where the `NWBConverter` class is defined.
+* `neurotensin_valence_notes.md`: notes and comments concerning this specific conversion.
+
+The directory might contain other files that are necessary for the conversion but those are the central ones.
+
