@@ -49,7 +49,7 @@ both of the methods above install the repository in [editable mode](https://pip.
 ### Running a specific conversion
 To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
 ```
-pip install -r src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_requirements.txt 
+pip install -r src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_requirements.txt
 ```
 
 You can run a specific conversion with the following command:
@@ -85,7 +85,7 @@ Each conversion is organized in a directory of its own in the `src` directory:
 
  For example, for the conversion `neurotensin_valence` you can find a directory located in `src/tye-lab-to-nwb/neurotensin_valence`. Inside each conversion directory you can find the following files:
 
-* `neurotensin_valence_convert_sesion.py`: this script defines the function to convert one full session of the conversion. 
+* `neurotensin_valence_convert_sesion.py`: this script defines the function to convert one full session of the conversion.
 * `neurotensin_valence_requirements.txt`: dependencies specific to this conversion.
 * `neurotensin_valence_metadata.yml`: metadata in yaml format for this specific conversion.
 * `neurotensin_valencebehaviorinterface.py`: the behavior interface. Usually ad-hoc for each conversion.
@@ -93,4 +93,3 @@ Each conversion is organized in a directory of its own in the `src` directory:
 * `neurotensin_valence_notes.md`: notes and comments concerning this specific conversion.
 
 The directory might contain other files that are necessary for the conversion but those are the central ones.
-
