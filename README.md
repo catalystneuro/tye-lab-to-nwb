@@ -49,13 +49,17 @@ both of the methods above install the repository in [editable mode](https://pip.
 ### Running a specific conversion
 To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
 ```
-pip install -r src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_requirements.txt
+pip install -r src/tye_lab_to_nwb/neurotensin_valence/requirements.txt
 ```
 
 You can run a specific conversion with the following command:
 ```
-python src/tye_lab_to_nwb/neurotensin_valence/neurotensin_valence_conversion_script.py
+python src/tye_lab_to_nwb/neurotensin_valence/convert_session.py
 ```
+
+Note that when installing `tye-lab-to-nwb` from `pip` the conversion script will be located
+wherever `pip` installs site packages. In this case you will need to manually copy/paste usage scripts
+to a location where you want to use them.
 
 ## Repository structure
 Each conversion is organized in a directory of its own in the `src` directory:
@@ -71,25 +75,28 @@ Each conversion is organized in a directory of its own in the `src` directory:
         ├── tye_lab_to_nwb
         │   ├── conversion_directory_1
         │   └── neurotensin_valence
+        │       ├── convert_session.py
+        │       ├── metadata.yml
         │       ├── neurotensin_valencebehaviorinterface.py
-        │       ├── neurotensin_valence_convert_session.py
-        │       ├── neurotensin_valence_metadata.yml
         │       ├── neurotensin_valencenwbconverter.py
-        │       ├── neurotensin_valence_requirements.txt
-        │       ├── neurotensin_valence_notes.md
-
+        │       ├── notes.md
+        │       ├── requirements.txt
         │       └── __init__.py
-        │   ├── conversion_directory_b
+        │   ├── conversion_directory_2
 
         └── __init__.py
 
  For example, for the conversion `neurotensin_valence` you can find a directory located in `src/tye-lab-to-nwb/neurotensin_valence`. Inside each conversion directory you can find the following files:
 
-* `neurotensin_valence_convert_sesion.py`: this script defines the function to convert one full session of the conversion.
-* `neurotensin_valence_requirements.txt`: dependencies specific to this conversion.
-* `neurotensin_valence_metadata.yml`: metadata in yaml format for this specific conversion.
+* `convert_sesion.py`: this script defines the function to convert one full session of the conversion.
+* `requirements.txt`: dependencies specific to this conversion.
+* `metadata.yml`: metadata in yaml format for this specific conversion.
+* `notes.md`: notes and comments concerning this specific conversion.
 * `neurotensin_valencebehaviorinterface.py`: the behavior interface. Usually ad-hoc for each conversion.
 * `neurotensin_valencenwbconverter.py`: the place where the `NWBConverter` class is defined.
-* `neurotensin_valence_notes.md`: notes and comments concerning this specific conversion.
 
 The directory might contain other files that are necessary for the conversion but those are the central ones.
+
+## Questions during a conversion
+If you encounter any problems during the conversion, [open an issue](https://github.com/catalystneuro/tye-lab-to-nwb/issues/new), and we will
+help you!
