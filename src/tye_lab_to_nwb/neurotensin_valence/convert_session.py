@@ -9,7 +9,6 @@ from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
 
 
 def session_to_nwb(source_dir_path: FilePathType, nwbfile_dir_path: FilePathType, stub_test: bool = False):
-
     source_dir_path = Path(source_dir_path)
     nwbfile_dir_path = Path(nwbfile_dir_path)
     if stub_test:
@@ -47,7 +46,6 @@ def session_to_nwb(source_dir_path: FilePathType, nwbfile_dir_path: FilePathType
 
 
 if __name__ == "__main__":
-
     # Parameters for conversion
     data_dir_path = Path("/Directory/With/Raw/Formats/")
     output_dir_path = Path("~/conversion_nwb/")
