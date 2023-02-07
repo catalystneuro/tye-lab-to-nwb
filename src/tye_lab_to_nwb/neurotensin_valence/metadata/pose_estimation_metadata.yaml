@@ -1,0 +1,41 @@
+PoseEstimation:
+  TopLeft:
+    name: TopLeftCameraPoseEstimationSeries
+    description: The pose estimation for the top left camera.
+    confidence_definition: The likelihood estimation from the algorithm.
+  BotLeft:
+    name: BottomLeftCameraPoseEstimationSeries
+    description: The pose estimation for the bottom left camera.
+    confidence_definition: The likelihood estimation from the algorithm.
+  TopRight:
+    name: TopRightCameraPoseEstimationSeries
+    description: The pose estimation for the top right camera.
+    confidence_definition: The likelihood estimation from the algorithm.
+  BotRight:
+    name: BottomRightCameraPoseEstimationSeries
+    description: The pose estimation for the bottom right camera.
+    confidence_definition: The likelihood estimation from the algorithm.
+  Port:
+    name: PortPoseEstimationSeries
+    description: The pose estimation for the port.
+    confidence_definition: The likelihood estimation from the algorithm.
+  Head:
+    name: HeadPoseEstimationSeries
+    description: The pose estimation for the head of the animal.
+    confidence_definition: The likelihood estimation from the algorithm.
+  Electrode:
+    name: ElectrodePoseEstimationSeries
+    description: The pose estimation for the electrode.
+    confidence_definition: The likelihood estimation from the algorithm.
+  LeftEar:
+    name: LeftEarPoseEstimationSeries
+    description: The pose estimation for the left ear of the animal.
+    confidence_definition: The likelihood estimation from the algorithm.
+  RightEar:
+    name: RightEarPoseEstimationSeries
+    description: The pose estimation for the right ear of the animal.
+    confidence_definition: The likelihood estimation from the algorithm.
+  MouseTail:
+    name: TailPoseEstimationSeries
+    description: The pose estimation for the tail of the animal.
+    confidence_definition: The likelihood estimation from the algorithm.
