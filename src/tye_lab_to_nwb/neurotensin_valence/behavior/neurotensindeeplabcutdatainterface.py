@@ -10,6 +10,7 @@ from neuroconv.utils import (
     OptionalFilePathType,
     FilePathType,
     load_dict_from_file,
+    ArrayType,
 )
 from pynwb.file import NWBFile
 
@@ -64,6 +65,7 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         metadata: Optional[dict] = None,
         original_video_file_path: OptionalFilePathType = None,
         labeled_video_file_path: OptionalFilePathType = None,
+        edges: Optional[ArrayType] = None,
         column_mappings: Optional[dict] = None,
         overwrite: bool = False,
     ):
@@ -100,7 +102,7 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
                 scorer=pose_estimation_config["data"]["Scorer"],
                 source_software="DeepLabCut",
                 nodes=[pose_estimation_metadata[column_name]["name"] for column_name in pose_estimation_metadata],
-                edges=np.array([(0, 1), (0, 2), (2, 3), (1, 3), (5, 6), (5, 7), (5, 8), (5, 9)], dtype=np.uint8),
+                edges=np.asarray(edges, dtype=np.uint8),
             )
 
             if original_video_file_path is not None:

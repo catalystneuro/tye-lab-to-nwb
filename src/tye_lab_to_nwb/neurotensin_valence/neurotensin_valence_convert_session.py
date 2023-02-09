@@ -86,8 +86,19 @@ if __name__ == "__main__":
     pose_estimation_file_path = Path(
         "Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
     )
-    pose_estimation_config_file_path = Path(
-        "Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
+
+    pose_estimation_config_file_path = "/Volumes/t7-ssd/Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
+    pose_estimation_source_data = dict(
+        file_path=pose_estimation_file_path,
+        config_file_path=pose_estimation_config_file_path,
+    )
+
+    # The edges between the nodes (e.g. labeled body parts) defined as array of pairs of indices.
+    edges = [(0, 1), (0, 2), (2, 3), (1, 3), (5, 6), (5, 7), (5, 8), (5, 9)]
+    pose_estimation_conversion_options = dict(
+        original_video_file_path="H028Disc4.mkv",
+        labeled_video_file_path="H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000_labeled.mp4",
+        edges=edges,
     )
     raw_video_file_path = Path("H028Disc4.mkv")
     labeled_video_file_path = Path("H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000_labeled.mp4")
