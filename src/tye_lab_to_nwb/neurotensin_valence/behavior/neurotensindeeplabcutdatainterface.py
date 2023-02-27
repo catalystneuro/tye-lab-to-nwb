@@ -85,7 +85,7 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
                         name=pose_estimation_metadata[column_name]["name"],
                         description=pose_estimation_metadata[column_name]["description"],
                         data=pose_estimation_series_data[["x", "y"]].values,
-                        unit="pixels",
+                        unit="px",
                         reference_frame="(0,0,0) corresponds to bottom left corner of the cage.",
                         rate=pose_estimation_config["data"]["fps"],
                         starting_time=0.0,  # TODO
