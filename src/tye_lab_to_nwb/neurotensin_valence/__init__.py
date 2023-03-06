@@ -1,2 +1,1 @@
-from .neurotensin_valencebehaviorinterface import NeurotensinValenceBehaviorInterface
 from .neurotensin_valencenwbconverter import NeurotensinValenceNWBConverter
