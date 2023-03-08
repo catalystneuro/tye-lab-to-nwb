@@ -27,17 +27,17 @@ def session_to_nwb(
     source_data = dict()
     conversion_options = dict()
 
-    # Add Recording
-    source_data.update(dict(Recording=dict()))
-    conversion_options.update(dict(Recording=dict()))
-
-    # Add LFP
-    source_data.update(dict(LFP=dict()))
-    conversion_options.update(dict(LFP=dict()))
-
-    # Add Sorting
-    source_data.update(dict(Sorting=dict()))
-    conversion_options.update(dict(Sorting=dict()))
+    # # Add Recording
+    # source_data.update(dict(Recording=dict()))
+    # conversion_options.update(dict(Recording=dict()))
+    #
+    # # Add LFP
+    # source_data.update(dict(LFP=dict()))
+    # conversion_options.update(dict(LFP=dict()))
+    #
+    # # Add Sorting
+    # source_data.update(dict(Sorting=dict()))
+    # conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
     source_data.update(dict(PoseEstimation=pose_estimation_source_data, Events=dict(file_path=events_file_path)))
@@ -75,10 +75,12 @@ if __name__ == "__main__":
 
     # Parameters for pose estimation data
     pose_estimation_file_path = (
-        "/Volumes/t7-ssd/Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
+        "Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
     )
 
-    pose_estimation_config_file_path = "/Volumes/t7-ssd/Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
+    pose_estimation_config_file_path = (
+        "Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
+    )
     pose_estimation_source_data = dict(
         file_path=pose_estimation_file_path,
         config_file_path=pose_estimation_config_file_path,
@@ -96,7 +98,7 @@ if __name__ == "__main__":
     events_column_mappings = dict(onset="start_time", offset="stop_time")
     events_conversion_options = dict(column_name_mapping=events_column_mappings)
 
-    output_dir_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles")
+    output_dir_path = Path("Hao_NWB/nwbfiles")
     stub_test = False
 
     session_to_nwb(
