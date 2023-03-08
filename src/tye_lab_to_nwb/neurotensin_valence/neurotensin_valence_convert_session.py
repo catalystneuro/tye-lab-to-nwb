@@ -44,7 +44,7 @@ def session_to_nwb(
     conversion_options.update(
         dict(
             PoseEstimation=pose_estimation_conversion_options,
-            Events=dict(column_name_mapping=events_conversion_options),
+            Events=events_conversion_options,
         )
     )
 
