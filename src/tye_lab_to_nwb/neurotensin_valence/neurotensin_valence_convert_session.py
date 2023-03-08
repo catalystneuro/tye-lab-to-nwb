@@ -27,17 +27,17 @@ def session_to_nwb(
     source_data = dict()
     conversion_options = dict()
 
-    # # Add Recording
-    # source_data.update(dict(Recording=dict()))
-    # conversion_options.update(dict(Recording=dict()))
-    #
-    # # Add LFP
-    # source_data.update(dict(LFP=dict()))
-    # conversion_options.update(dict(LFP=dict()))
-    #
-    # # Add Sorting
-    # source_data.update(dict(Sorting=dict()))
-    # conversion_options.update(dict(Sorting=dict()))
+    # Add Recording
+    source_data.update(dict(Recording=dict()))
+    conversion_options.update(dict(Recording=dict()))
+
+    # Add LFP
+    source_data.update(dict(LFP=dict()))
+    conversion_options.update(dict(LFP=dict()))
+
+    # Add Sorting
+    source_data.update(dict(Sorting=dict()))
+    conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
     source_data.update(dict(PoseEstimation=pose_estimation_source_data, Events=dict(file_path=events_file_path)))
