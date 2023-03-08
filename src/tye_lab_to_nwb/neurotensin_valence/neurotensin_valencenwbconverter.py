@@ -1,14 +1,18 @@
 """Primary NWBConverter class for this dataset."""
 from neuroconv import NWBConverter
 
-from tye_lab_to_nwb.neurotensin_valence.behavior import NeurotensinDeepLabCutInterface
+from tye_lab_to_nwb.neurotensin_valence.behavior import (
+    NeurotensinDeepLabCutInterface,
+    NeurotensinEventsInterface,
+)
 
 
 class NeurotensinValenceNWBConverter(NWBConverter):
     """Primary conversion class for my extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        Behavior=NeurotensinDeepLabCutInterface,
+        PoseEstimation=NeurotensinDeepLabCutInterface,
+        Events=NeurotensinEventsInterface,
     )
 
     def get_metadata_schema(self) -> dict:

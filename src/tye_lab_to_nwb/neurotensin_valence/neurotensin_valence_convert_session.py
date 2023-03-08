@@ -12,6 +12,8 @@ from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
 def session_to_nwb(
     data_dir_path: FilePathType,
     output_dir_path: FilePathType,
+    events_file_path: FilePathType,
+    events_conversion_options: Optional[dict] = None,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
     stub_test: bool = False,
@@ -38,8 +40,13 @@ def session_to_nwb(
     conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
-    source_data.update(dict(Behavior=pose_estimation_source_data))
-    conversion_options.update(dict(Behavior=pose_estimation_conversion_options))
+    source_data.update(dict(PoseEstimation=pose_estimation_source_data, Events=dict(file_path=events_file_path)))
+    conversion_options.update(
+        dict(
+            PoseEstimation=pose_estimation_conversion_options,
+            Events=dict(column_name_mapping=events_conversion_options),
+        )
+    )
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
 
@@ -68,12 +75,10 @@ if __name__ == "__main__":
 
     # Parameters for pose estimation data
     pose_estimation_file_path = (
-        "Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
+        "/Volumes/t7-ssd/Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
     )
 
-    pose_estimation_config_file_path = (
-        "Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
-    )
+    pose_estimation_config_file_path = "/Volumes/t7-ssd/Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
     pose_estimation_source_data = dict(
         file_path=pose_estimation_file_path,
         config_file_path=pose_estimation_config_file_path,
@@ -87,12 +92,18 @@ if __name__ == "__main__":
         edges=edges,
     )
 
-    output_dir_path = Path("Hao_NWB/nwbfiles")
+    events_mat_file_path = "Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/0028_20200221_20k_events.mat"
+    events_column_mappings = dict(onset="start_time", offset="stop_time")
+    events_conversion_options = dict(column_name_mapping=events_column_mappings)
+
+    output_dir_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles")
     stub_test = False
 
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
+        events_file_path=events_mat_file_path,
+        events_conversion_options=events_conversion_options,
         pose_estimation_source_data=pose_estimation_source_data,
         pose_estimation_conversion_options=pose_estimation_conversion_options,
         stub_test=stub_test,
