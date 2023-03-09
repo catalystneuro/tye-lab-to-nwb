@@ -31,17 +31,9 @@ class NeurotensinEventsInterface(TimeIntervalsInterface):
         events.index.name = "trial_type"
         events = events.reset_index()
 
-        event_names_mapping = {
-            0: "reward_stimulus_presentation",
-            1: "phototagging",
-            2: "shock_stimulus_presentation",
-            3: "reward_delivery",
-            4: "shock_relay",
-            5: "port_entry",
-            6: "neutral_stimulus_presentation",
-            7: "session_start",
-        }
-        events["trial_type"] = events["trial_type"].map(event_names_mapping)
+        if "event_names_mapping" in read_kwargs:
+            event_names_mapping = read_kwargs["event_names_mapping"]
+            events["trial_type"] = events["trial_type"].map(event_names_mapping)
 
         # unpack list of lists in onset and offset columns
         events = events.explode(column=["onset", "offset"])
@@ -49,9 +41,7 @@ class NeurotensinEventsInterface(TimeIntervalsInterface):
         # sort timestamps in ascending order
         events = events.sort_values(by="onset", ascending=True)
 
-        # drop empty phototagging event
+        # drop empty events
         events = events.dropna(axis=0)
-        # drop session start cue
-        events = events[events["trial_type"] != "session_start"]
 
         return events

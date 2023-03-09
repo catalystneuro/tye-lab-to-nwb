@@ -40,7 +40,23 @@ def session_to_nwb(
     conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
-    source_data.update(dict(PoseEstimation=pose_estimation_source_data, Events=dict(file_path=events_file_path)))
+    event_names_mapping = {
+        0: "reward_stimulus_presentation",
+        1: "phototagging",
+        2: "shock_stimulus_presentation",
+        3: "reward_delivery",
+        4: "shock_relay",
+        5: "port_entry",
+        6: "neutral_stimulus_presentation",
+    }
+    read_kwargs = dict(event_names_mapping=event_names_mapping)
+    events_source_data = dict(file_path=events_file_path, read_kwargs=read_kwargs)
+    source_data.update(
+        dict(
+            PoseEstimation=pose_estimation_source_data,
+            Events=events_source_data,
+        )
+    )
     conversion_options.update(
         dict(
             PoseEstimation=pose_estimation_conversion_options,
