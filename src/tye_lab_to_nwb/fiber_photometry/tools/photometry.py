@@ -49,7 +49,6 @@ def add_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadat
         fluorophores=[0],
         location=metadata["FibersTable"]["location"],
         notes=metadata["FibersTable"]["notes"],
-        # from article, confirm?
     )
 
     # Create reference for fibers
