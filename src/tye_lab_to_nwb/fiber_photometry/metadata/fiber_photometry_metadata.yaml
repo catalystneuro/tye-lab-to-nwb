@@ -26,3 +26,19 @@ FibersTable:
 RoiResponseSeries:
     description: The photometry intensity values measured in arbitrary units.
     unit: a.u.
+Events:
+    name: LabeledEvents
+    description: The LED events during photometry.
+    labels:
+      17: LED415
+      18: LED470
+      20: LED560
+      273: Stimulus presentation while LED415
+      274: Stimulus presentation while LED470
+      276: Stimulus presentation while LED560
+      529: Lick while LED415
+      530: Lick while LED470
+      532: Lick while LED560
+      785: TODO while LED415 # missing description
+      786: TODO while LED470 # missing description
+      788: TODO while LED560 # missing description

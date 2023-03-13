@@ -9,7 +9,10 @@ from neuroconv.tools.nwb_helpers import make_or_load_nwbfile
 from neuroconv.utils import FilePathType, load_dict_from_file, OptionalFilePathType
 from pynwb import NWBFile
 
-from tye_lab_to_nwb.fiber_photometry.tools.photometry import add_photometry
+from tye_lab_to_nwb.fiber_photometry.tools import (
+    add_photometry,
+    add_events_from_photometry,
+)
 
 
 class FiberPhotometryInterface(BaseDataInterface):
@@ -102,4 +105,5 @@ class FiberPhotometryInterface(BaseDataInterface):
             nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
         ) as nwbfile_out:
             photometry_data = self._load_source_data()
+            add_events_from_photometry(photometry_dataframe=photometry_data, nwbfile=nwbfile_out, metadata=metadata)
             add_photometry(photometry_dataframe=photometry_data, nwbfile=nwbfile_out, metadata=metadata)

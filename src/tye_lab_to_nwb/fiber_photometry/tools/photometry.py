@@ -2,6 +2,7 @@ from typing import Optional
 
 import pandas as pd
 from hdmf.common import DynamicTableRegion
+from ndx_events import LabeledEvents, AnnotatedEventsTable
 from ndx_photometry import FibersTable, FiberPhotometry, ExcitationSourcesTable, PhotodetectorsTable, FluorophoresTable
 from pynwb import NWBFile
 from pynwb.ophys import RoiResponseSeries
@@ -70,3 +71,18 @@ def add_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadat
     )
 
     nwbfile.add_acquisition(roi_response_series)
+
+
+def add_events_from_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadata: Optional[dict]):
+    annotated_events = AnnotatedEventsTable(
+        name=metadata["Events"]["name"],
+        description=metadata["Events"]["description"],
+    )
+    for event_num, event_label in metadata["Events"]["labels"].items():
+        annotated_events.add_event_type(
+            label=event_label,
+            event_description=f"The times when the {event_label} was on.",
+            event_times=photometry_dataframe.loc[photometry_dataframe["Flags"] == event_num, "Timestamp"].values,
+        )
+
+    nwbfile.add_acquisition(annotated_events)
