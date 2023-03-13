@@ -2,7 +2,7 @@ from typing import Optional
 
 import pandas as pd
 from hdmf.common import DynamicTableRegion
-from ndx_events import LabeledEvents, AnnotatedEventsTable
+from ndx_events import AnnotatedEventsTable
 from ndx_photometry import FibersTable, FiberPhotometry, ExcitationSourcesTable, PhotodetectorsTable, FluorophoresTable
 from pynwb import NWBFile
 from pynwb.ophys import RoiResponseSeries
