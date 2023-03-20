@@ -35,6 +35,7 @@ class FiberPhotometryInterface(BaseDataInterface):
         """
         self.verbose = verbose
         super().__init__(file_path=file_path)
+        self.photometry_dataframe = self._read_file()
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
@@ -46,10 +47,10 @@ class FiberPhotometryInterface(BaseDataInterface):
 
         return metadata
 
-    def _load_source_data(self) -> pd.DataFrame:
+    def _read_file(self) -> pd.DataFrame:
         return pd.read_csv(self.source_data["file_path"], header=0)
 
-    def get_original_timestamps(self) -> np.ndarray:
+    def get_original_timestamps(self, column: str = "Timestamp") -> np.ndarray:
         """
         Retrieve the original unaltered timestamps for the data in this interface.
 
@@ -60,12 +61,9 @@ class FiberPhotometryInterface(BaseDataInterface):
         timestamps: numpy.ndarray
             The timestamps for the data stream.
         """
-        raise NotImplementedError(
-            "Unable to retrieve the original unaltered timestamps for this interface! "
-            "Define the `get_original_timestamps` method for this interface."
-        )
+        return self._read_file()[column].values
 
-    def get_timestamps(self) -> np.ndarray:
+    def get_timestamps(self, column: str = "Timestamp") -> np.ndarray:
         """
         Retrieve the timestamps for the data in this interface.
 
@@ -74,11 +72,9 @@ class FiberPhotometryInterface(BaseDataInterface):
         timestamps: numpy.ndarray
             The timestamps for the data stream.
         """
-        raise NotImplementedError(
-            "Unable to retrieve timestamps for this interface! Define the `get_timestamps` method for this interface."
-        )
+        return self.photometry_dataframe[column].values
 
-    def align_timestamps(self, aligned_timestamps: np.ndarray):
+    def align_timestamps(self, aligned_timestamps: np.ndarray, column: str = "Timestamp"):
         """
         Replace all timestamps for this interface with those aligned to the common session start time.
 
@@ -89,9 +85,7 @@ class FiberPhotometryInterface(BaseDataInterface):
         aligned_timestamps : numpy.ndarray
             The synchronized timestamps for data in this interface.
         """
-        raise NotImplementedError(
-            "The protocol for synchronizing the timestamps of this interface has not been specified!"
-        )
+        self.photometry_dataframe[column] = aligned_timestamps
 
     def run_conversion(
         self,
@@ -104,6 +98,7 @@ class FiberPhotometryInterface(BaseDataInterface):
         with make_or_load_nwbfile(
             nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
         ) as nwbfile_out:
-            photometry_data = self._load_source_data()
-            add_events_from_photometry(photometry_dataframe=photometry_data, nwbfile=nwbfile_out, metadata=metadata)
-            add_photometry(photometry_dataframe=photometry_data, nwbfile=nwbfile_out, metadata=metadata)
+            add_events_from_photometry(
+                photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile_out, metadata=metadata
+            )
+            add_photometry(photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile_out, metadata=metadata)
