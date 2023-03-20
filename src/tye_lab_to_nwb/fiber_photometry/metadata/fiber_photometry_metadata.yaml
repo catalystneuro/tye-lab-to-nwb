@@ -39,6 +39,6 @@ Events:
       529: Lick while LED415
       530: Lick while LED470
       532: Lick while LED560
-      785: Both cued stimulus and lick while LED415
-      786: Both cued stimulus and lick while LED470
-      788: Both cued stimulus and lick while LED560
+      785: Cued stimulus and lick while LED415
+      786: Cued stimulus and lick while LED470
+      788: Cued stimulus and lick while LED560
