@@ -1,9 +1,8 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 from pathlib import Path
-import datetime
 from typing import Optional
-from zoneinfo import ZoneInfo
 
+from dateutil import tz
 from neuroconv.utils import load_dict_from_file, dict_deep_update, FilePathType
 
 from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
@@ -12,6 +11,7 @@ from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
 def session_to_nwb(
     data_dir_path: FilePathType,
     output_dir_path: FilePathType,
+    port_entry_file_path: FilePathType,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
     stub_test: bool = False,
@@ -38,15 +38,17 @@ def session_to_nwb(
     conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
-    source_data.update(dict(Behavior=pose_estimation_source_data))
-    conversion_options.update(dict(Behavior=pose_estimation_conversion_options))
+    source_data.update(dict(PoseEstimation=pose_estimation_source_data, PortEntry=dict(file_path=port_entry_file_path)))
+    conversion_options.update(dict(PoseEstimation=pose_estimation_conversion_options))
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
-    date = datetime.datetime(year=2020, month=1, day=1, tzinfo=ZoneInfo("US/Eastern"))  # TO-DO: Get this from author
-    metadata["NWBFile"]["session_start_time"] = date
+    # For data provenance we add the time zone information to the conversion
+    tzinfo = tz.gettz("US/Pacific")
+    session_start_time = metadata["NWBFile"]["session_start_time"]
+    metadata["NWBFile"].update(session_start_time=session_start_time.replace(tzinfo=tzinfo))
 
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "neurotensin_valence_metadata.yaml"
@@ -87,12 +89,16 @@ if __name__ == "__main__":
         edges=edges,
     )
 
+    # The file path to the txt file that contains the port entry (P) and port exit (N) times.
+    port_entry_file_path = "Hao_NWB/behavior/portentry/H028Disc3.txt"
+
     output_dir_path = Path("Hao_NWB/nwbfiles")
     stub_test = False
 
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
+        port_entry_file_path=port_entry_file_path,
         pose_estimation_source_data=pose_estimation_source_data,
         pose_estimation_conversion_options=pose_estimation_conversion_options,
         stub_test=stub_test,
