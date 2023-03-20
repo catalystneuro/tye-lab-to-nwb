@@ -33,12 +33,12 @@ Events:
       17: LED415
       18: LED470
       20: LED560
-      273: Stimulus presentation while LED415
-      274: Stimulus presentation while LED470
-      276: Stimulus presentation while LED560
+      273: Cued stimulus while LED415
+      274: Cued stimulus while LED470
+      276: Cued stimulus while LED560
       529: Lick while LED415
       530: Lick while LED470
       532: Lick while LED560
-      785: TODO while LED415 # missing description
-      786: TODO while LED470 # missing description
-      788: TODO while LED560 # missing description
+      785: Both cued stimulus and lick while LED415
+      786: Both cued stimulus and lick while LED470
+      788: Both cued stimulus and lick while LED560
