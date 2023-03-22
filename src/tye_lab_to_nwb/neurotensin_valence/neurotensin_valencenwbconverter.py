@@ -29,6 +29,8 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         start_times = []
         for interface in self.data_interface_objects.values():
             interface_metadata = interface.get_metadata()
+            if "NWBFile" not in interface_metadata:
+continue
             if "session_start_time" in interface_metadata["NWBFile"]:
                 start_times.append(interface_metadata["NWBFile"]["session_start_time"])
 
