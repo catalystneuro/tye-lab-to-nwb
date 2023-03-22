@@ -7,3 +7,6 @@ NWBFile:
   related_publications: https://doi.org/10.1038/s41586-022-04964-y
 Subject:
   species: Mus musculus
+  age: P8W/P20W # male and female mice between the ages of 8-20 weeks were used for all experiments
+  sex: U # "M" is for male, "F" is for female (for this session it is unknown)
+  #strain: C57BL/6J # the strain of the mouse for this session
