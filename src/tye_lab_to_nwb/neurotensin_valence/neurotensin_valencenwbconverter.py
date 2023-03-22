@@ -1,4 +1,7 @@
 """Primary NWBConverter class for this dataset."""
+from typing import Optional
+
+from pynwb import NWBFile
 from neuroconv import NWBConverter
 from neuroconv.datainterfaces import (
     OpenEphysRecordingInterface,
@@ -38,3 +41,21 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         metadata["NWBFile"].update(session_start_time=min(start_times))
 
         return metadata
+
+    def run_conversion(
+        self,
+        nwbfile_path: Optional[str] = None,
+        nwbfile: Optional[NWBFile] = None,
+        metadata: Optional[dict] = None,
+        overwrite: bool = False,
+        conversion_options: Optional[dict] = None,
+    ):
+        recording_interface = self.data_interface_objects["Recording"]
+        # manually override t_start
+        recording_interface.recording_extractor._recording_segments[0].t_start = None
+        super().run_conversion(
+            nwbfile_path=nwbfile_path,
+            nwbfile=nwbfile,
+            metadata=metadata,
+            conversion_options=conversion_options,
+        )
