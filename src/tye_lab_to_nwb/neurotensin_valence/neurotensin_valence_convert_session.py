@@ -18,10 +18,6 @@ def session_to_nwb(
     stub_test: bool = False,
 ):
     data_dir_path = Path(data_dir_path)
-    output_dir_path = Path(output_dir_path)
-    if stub_test:
-        output_dir_path = output_dir_path / "nwb_stub"
-    output_dir_path.mkdir(parents=True, exist_ok=True)
 
     source_data = dict()
     conversion_options = dict()
@@ -48,10 +44,20 @@ def session_to_nwb(
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    session_id = "subject_identifier_usually"
-    if "session_id" in metadata["NWBFile"]:
-        session_id = metadata["NWBFile"]["session_id"]
-    nwbfile_path = output_dir_path / f"{session_id}.nwb"
+    session_id = data_dir_path.stem
+    subject_id = session_id.split("_")[0]
+    if "subject_id" not in metadata["Subject"]:
+        metadata["Subject"].update(subject_id=subject_id)
+    if "session_id" not in metadata["NWBFile"]:
+        metadata["NWBFile"].update(session_id=session_id.replace("_", "-"))
+
+    output_dir_path = Path(output_dir_path) / f"sub-{subject_id}"
+    if stub_test:
+        output_dir_path = output_dir_path / "nwb_stub"
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    nwbfile_name = f"sub-{subject_id}_ses-{session_id}.nwb"
+    nwbfile_path = output_dir_path / nwbfile_name
 
     # Run conversion
     converter.run_conversion(metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options)
