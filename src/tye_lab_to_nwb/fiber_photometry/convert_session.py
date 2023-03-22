@@ -45,9 +45,7 @@ def session_to_nwb(
 if __name__ == "__main__":
     # Parameters for conversion
     photometry_file_path = Path("/Volumes/t7-ssd/Hao_NWB/recording/Photometry_data0.csv")
-    output_dir_path = Path(
-        "/Users/weian/Library/Mobile Documents/com~apple~CloudDocs/catalystneuro/tye-lab-to-nwb/204134"
-    )
+    output_dir_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles")
 
     session_to_nwb(
         file_path=photometry_file_path,
