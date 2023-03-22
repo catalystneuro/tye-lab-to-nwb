@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from neuroconv.utils import FilePathType
+from neuroconv.utils import FilePathType, load_dict_from_file, dict_deep_update
 
 from tye_lab_to_nwb.fiber_photometry import FiberPhotometryInterface
 
@@ -17,11 +17,17 @@ def session_to_nwb(
     interface = FiberPhotometryInterface(file_path=str(file_path))
     metadata = interface.get_metadata()
 
-    nwbfile_path = output_dir_path / "fiber_photometry.nwb"
+    # Update default metadata with the editable in the corresponding yaml file
+    editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
+    editable_metadata = load_dict_from_file(editable_metadata_path)
+    metadata = dict_deep_update(metadata, editable_metadata)
+
+    nwbfile_path = output_dir_path / f"{photometry_file_path.stem}.nwb"
 
     # Add datetime to conversion
-    date = datetime(year=2020, month=1, day=1, tzinfo=ZoneInfo("US/Eastern"))  # TO-DO: Get this from author
-    metadata["NWBFile"]["session_start_time"] = date
+    if "session_start_time" not in metadata["NWBFile"]:
+        date = datetime(year=2020, month=1, day=1, tzinfo=ZoneInfo("US/Eastern"))  # TO-DO: Get this from author
+        metadata["NWBFile"].update(session_start_time=date)
 
     interface.run_conversion(nwbfile_path=nwbfile_path, metadata=metadata)
 

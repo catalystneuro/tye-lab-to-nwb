@@ -1,0 +1,9 @@
+NWBFile:
+  session_description: Contains photometry intensity values obtained from a single fiber implanted in BLA.
+  institution: Salk Institute for Biological Studies
+  lab: Tye
+  experimenter:
+    - Li, Hao
+  related_publications: https://doi.org/10.1038/s41586-022-04964-y
+Subject:
+  species: Mus musculus
