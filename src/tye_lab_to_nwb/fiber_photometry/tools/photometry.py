@@ -1,6 +1,7 @@
 from typing import Optional
 
 import pandas as pd
+from hdmf.backends.hdf5 import H5DataIO
 from hdmf.common import DynamicTableRegion
 from ndx_events import AnnotatedEventsTable
 from ndx_photometry import FibersTable, FiberPhotometry, ExcitationSourcesTable, PhotodetectorsTable, FluorophoresTable
@@ -65,9 +66,9 @@ def add_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadat
         roi_response_series = RoiResponseSeries(
             name=roi_response_series_name,
             description=photometry_metadata["description"],
-            data=photometry_dataframe[column].values,
+            data=H5DataIO(photometry_dataframe[column].values, compression=True),
             unit=photometry_metadata["unit"],
-            timestamps=photometry_dataframe["Timestamp"].values,
+            timestamps=H5DataIO(photometry_dataframe["Timestamp"].values, compression=True),
             rois=rois,
         )
 
