@@ -5,9 +5,6 @@ ExcitationSourcesTable:
   - name: LED470
     peak_wavelength: 470.0 # in nanometers
     source_type: LED
-  - name: LED560
-    peak_wavelength: 560.0 # in nanometers
-    source_type: LED
 PhotodetectorsTable:
     description: The metadata for the photodetector.
     type: CMOS camera
@@ -24,7 +21,9 @@ FibersTable:
     location: BLA
     notes: The optical fiber was implanted above the BLA.
 RoiResponseSeries:
-    description: The photometry intensity values measured in arbitrary units.
+  - region: Region0G
+    name: RoiResponseSeriesRegion0G
+    description: The photometry intensity values measured in arbitrary units and recorded from BLA.
     unit: a.u.
 Events:
     name: LabeledEvents
@@ -32,13 +31,9 @@ Events:
     labels:
       17: LED415
       18: LED470
-      20: LED560
       273: Cued stimulus while LED415
       274: Cued stimulus while LED470
-      276: Cued stimulus while LED560
       529: Lick while LED415
       530: Lick while LED470
-      532: Lick while LED560
       785: Cued stimulus and lick while LED415
       786: Cued stimulus and lick while LED470
-      788: Cued stimulus and lick while LED560
