@@ -59,17 +59,19 @@ def add_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadat
         table=fibers_table,
     )
     # Create the RoiResponseSeries that holds the intensity values
-    roi_response_series_name = "RoiResponseSeries"
-    roi_response_series = RoiResponseSeries(
-        name=roi_response_series_name,
-        description=metadata[roi_response_series_name]["description"],
-        data=photometry_dataframe["Region1R"].values,
-        unit=metadata[roi_response_series_name]["unit"],
-        timestamps=photometry_dataframe["Timestamp"].values,
-        rois=rois,
-    )
+    for photometry_metadata in metadata["RoiResponseSeries"]:
+        column = photometry_metadata["region"]
+        roi_response_series_name = photometry_metadata["name"]
+        roi_response_series = RoiResponseSeries(
+            name=roi_response_series_name,
+            description=photometry_metadata["description"],
+            data=photometry_dataframe[column].values,
+            unit=photometry_metadata["unit"],
+            timestamps=photometry_dataframe["Timestamp"].values,
+            rois=rois,
+        )
 
-    nwbfile.add_acquisition(roi_response_series)
+        nwbfile.add_acquisition(roi_response_series)
 
 
 def add_events_from_photometry(photometry_dataframe: pd.DataFrame, nwbfile: NWBFile, metadata: Optional[dict]):
