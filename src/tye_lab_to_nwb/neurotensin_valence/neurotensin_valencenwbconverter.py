@@ -18,11 +18,10 @@ class NeurotensinValenceNWBConverter(NWBConverter):
     """Primary conversion class for my extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        PoseEstimation=NeurotensinDeepLabCutInterface,
-        Events=NeurotensinEventsInterface,
         Recording=OpenEphysRecordingInterface,
         Sorting=PlexonSortingInterface,
-        Behavior=NeurotensinDeepLabCutInterface,
+        PoseEstimation=NeurotensinDeepLabCutInterface,
+        Events=NeurotensinEventsInterface,
     )
 
     def get_metadata_schema(self) -> dict:
