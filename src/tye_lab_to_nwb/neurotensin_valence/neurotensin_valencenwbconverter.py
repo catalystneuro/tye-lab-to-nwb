@@ -12,7 +12,6 @@ from tye_lab_to_nwb.neurotensin_valence.behavior import (
     NeurotensinDeepLabCutInterface,
     NeurotensinEventsInterface,
 )
-from tye_lab_to_nwb.neurotensin_valence.behavior import NeurotensinDeepLabCutInterface
 from tye_lab_to_nwb.neurotensin_valence.images import NeurotensinConfocalImagesInterface
 
 
@@ -24,7 +23,6 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         Sorting=PlexonSortingInterface,
         PoseEstimation=NeurotensinDeepLabCutInterface,
         Events=NeurotensinEventsInterface,
-        Behavior=NeurotensinDeepLabCutInterface,
         Images=NeurotensinConfocalImagesInterface,
     )
 

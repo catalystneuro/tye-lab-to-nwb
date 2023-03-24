@@ -1,8 +1,6 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 from pathlib import Path
-import datetime
 from typing import Optional
-from zoneinfo import ZoneInfo
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update, FilePathType
 
@@ -14,8 +12,8 @@ def session_to_nwb(
     output_dir_path: FilePathType,
     plexon_file_path: FilePathType,
     events_file_path: FilePathType,
-    events_conversion_options: Optional[dict] = None,
     histology_file_path: FilePathType,
+    events_conversion_options: Optional[dict] = None,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
     stub_test: bool = False,
@@ -131,6 +129,7 @@ if __name__ == "__main__":
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         events_file_path=events_mat_file_path,
+        histology_file_path=histology_file_path,
         events_conversion_options=events_conversion_options,
         plexon_file_path=plexon_file_path,
         pose_estimation_source_data=pose_estimation_source_data,
