@@ -13,6 +13,7 @@ def session_to_nwb(
     data_dir_path: FilePathType,
     output_dir_path: FilePathType,
     plexon_file_path: FilePathType,
+    histology_file_path: FilePathType,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
     stub_test: bool = False,
@@ -33,6 +34,9 @@ def session_to_nwb(
     # Add Behavior
     source_data.update(dict(Behavior=pose_estimation_source_data))
     conversion_options.update(dict(Behavior=pose_estimation_conversion_options))
+
+    # Add confocal images
+    source_data.update(dict(Images=dict(file_path=histology_file_path)))
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
 
@@ -89,6 +93,9 @@ if __name__ == "__main__":
         labeled_video_file_path="H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000_labeled.mp4",
         edges=edges,
     )
+
+    # The file path to the Olympus Image File (.oif)
+    histology_file_path = "Hao_NWB/histo/H28PVT_40x.oif"
 
     output_dir_path = Path("Hao_NWB/nwbfiles")
     stub_test = False
