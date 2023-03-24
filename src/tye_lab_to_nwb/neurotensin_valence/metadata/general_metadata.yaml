@@ -1,0 +1,34 @@
+NWBFile:
+  experiment_description: |
+    The ability to associate temporally segregated information and assign positive or
+    negative valence to environmental cues is paramount for survival. Studies have shown
+    that different projections from the basolateral amygdala (BLA) are potentiated
+    following reward or punishment learning1–7. However, we do not yet understand how
+    valence-specific information is routed to the BLA neurons with the appropriate
+    downstream projections, nor do we understand how to reconcile the sub-second
+    timescales of synaptic plasticity8–11 with the longer timescales separating the
+    predictive cues from their outcomes. Here we demonstrate that neurotensin
+    (NT)-expressing neurons in the paraventricular nucleus of the thalamus (PVT)
+    projecting to the BLA (PVT-BLA:NT) mediate valence assignment by exerting NT
+    concentration-dependent modulation in BLA during associative learning.
+    We found that optogenetic activation of the PVT-BLA:NT projection promotes reward
+    learning, whereas PVT-BLA projection-specific knockout of the NT gene (Nts) augments
+    punishment learning. Using genetically encoded calcium and NT sensors, we further
+    revealed that both calcium dynamics within the PVT-BLA:NT projection and NT
+    concentrations in the BLA are enhanced after reward learning and reduced after
+    punishment learning. Finally, we showed that CRISPR-mediated knockout of the Nts
+    gene in the PVT-BLA pathway blunts BLA neural dynamics and attenuates the preference
+    for active behavioural strategies to reward and punishment predictive cues. In sum,
+    we have identified NT as a neuropeptide that signals valence in the BLA, and showed
+    that NT is a critical neuromodulator that orchestrates positive and negative valence
+    assignment in amygdala neurons by extending valence-specific plasticity to
+    behaviourally relevant timescales.
+  institution: Salk Institute for Biological Studies
+  lab: Tye
+  experimenter:
+    - Li, Hao
+  related_publications: https://doi.org/10.1038/s41586-022-04964-y
+Subject:
+  species: Mus musculus
+  age: P8W/P20W # male and female mice between the ages of 8-20 weeks were used for all experiments
+  sex: U # "M" is for male, "F" is for female (for this session it is unknown)

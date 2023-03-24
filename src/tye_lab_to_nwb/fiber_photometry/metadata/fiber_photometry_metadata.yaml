@@ -1,0 +1,39 @@
+ExcitationSourcesTable:
+  - name: LED415
+    peak_wavelength: 415.0 # in nanometers
+    source_type: LED
+  - name: LED470
+    peak_wavelength: 470.0 # in nanometers
+    source_type: LED
+PhotodetectorsTable:
+    description: The metadata for the photodetector.
+    type: CMOS camera
+FluorophoresTable:
+    description: The neurotensin-fluorescent sensor was injected into the BLA. The coordinates are in unit meters relative to Bregma (AP, ML, DV).
+    label: neurotensin-fluorescent sensor (green)
+    location: BLA
+    coordinates:
+      - -0.0016 # AP (in meters)
+      - 0.0035 # ML (in meters)
+      - -0.005 # DV (in meters relative to Bregma)
+FibersTable:
+    description: The metadata for the optical fiber.
+    location: BLA
+    notes: The optical fiber was implanted above the BLA.
+RoiResponseSeries:
+  - region: Region0G
+    name: RoiResponseSeriesRegion0G
+    description: The photometry intensity values measured in arbitrary units and recorded from BLA.
+    unit: a.u.
+Events:
+    name: LabeledEvents
+    description: The LED events during photometry.
+    labels:
+      17: LED415
+      18: LED470
+      273: Cued stimulus while LED415
+      274: Cued stimulus while LED470
+      529: Lick while LED415
+      530: Lick while LED470
+      785: Cued stimulus and lick while LED415
+      786: Cued stimulus and lick while LED470
