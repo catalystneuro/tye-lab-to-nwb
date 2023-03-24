@@ -13,6 +13,8 @@ def session_to_nwb(
     data_dir_path: FilePathType,
     output_dir_path: FilePathType,
     plexon_file_path: FilePathType,
+    events_file_path: FilePathType,
+    events_conversion_options: Optional[dict] = None,
     histology_file_path: FilePathType,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
@@ -32,8 +34,29 @@ def session_to_nwb(
     conversion_options.update(dict(Sorting=dict(stub_test=stub_test)))
 
     # Add Behavior
-    source_data.update(dict(Behavior=pose_estimation_source_data))
-    conversion_options.update(dict(Behavior=pose_estimation_conversion_options))
+    event_names_mapping = {
+        0: "reward_stimulus_presentation",
+        1: "phototagging",
+        2: "shock_stimulus_presentation",
+        3: "reward_delivery",
+        4: "shock_relay",
+        5: "port_entry",
+        6: "neutral_stimulus_presentation",
+    }
+    read_kwargs = dict(event_names_mapping=event_names_mapping)
+    events_source_data = dict(file_path=events_file_path, read_kwargs=read_kwargs)
+    source_data.update(
+        dict(
+            PoseEstimation=pose_estimation_source_data,
+            Events=events_source_data,
+        )
+    )
+    conversion_options.update(
+        dict(
+            PoseEstimation=pose_estimation_conversion_options,
+            Events=events_conversion_options,
+        )
+    )
 
     # Add confocal images
     source_data.update(dict(Images=dict(file_path=histology_file_path)))
@@ -94,6 +117,10 @@ if __name__ == "__main__":
         edges=edges,
     )
 
+    events_mat_file_path = "Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/0028_20200221_20k_events.mat"
+    events_column_mappings = dict(onset="start_time", offset="stop_time")
+    events_conversion_options = dict(column_name_mapping=events_column_mappings)
+
     # The file path to the Olympus Image File (.oif)
     histology_file_path = "Hao_NWB/histo/H28PVT_40x.oif"
 
@@ -103,6 +130,8 @@ if __name__ == "__main__":
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
+        events_file_path=events_mat_file_path,
+        events_conversion_options=events_conversion_options,
         plexon_file_path=plexon_file_path,
         pose_estimation_source_data=pose_estimation_source_data,
         pose_estimation_conversion_options=pose_estimation_conversion_options,
