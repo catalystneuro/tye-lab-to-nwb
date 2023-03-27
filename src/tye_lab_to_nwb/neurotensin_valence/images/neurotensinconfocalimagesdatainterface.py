@@ -64,7 +64,7 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         depth_range /= 1e6  # nm to m
         metadata_from_file["Images"] = dict(
             name=self.oif.filesystem.name,
-            description=f"The {location} confocal images from {software_name} version {software_version} exctracted from {image_file_name}.",
+            description=f"The {location} confocal images from {software_name} version {software_version} extracted from {image_file_name}.",
         )
 
         images_metadata = []
