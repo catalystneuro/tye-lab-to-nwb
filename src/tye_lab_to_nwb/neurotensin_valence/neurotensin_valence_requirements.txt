@@ -1,2 +1,3 @@
 neuroconv
 ndx_pose>=0.1.1
+oiffile==2022.9.29

@@ -12,6 +12,7 @@ from tye_lab_to_nwb.neurotensin_valence.behavior import (
     NeurotensinDeepLabCutInterface,
     NeurotensinEventsInterface,
 )
+from tye_lab_to_nwb.neurotensin_valence.images import NeurotensinConfocalImagesInterface
 
 
 class NeurotensinValenceNWBConverter(NWBConverter):
@@ -22,6 +23,7 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         Sorting=PlexonSortingInterface,
         PoseEstimation=NeurotensinDeepLabCutInterface,
         Events=NeurotensinEventsInterface,
+        Images=NeurotensinConfocalImagesInterface,
     )
 
     def get_metadata_schema(self) -> dict:
