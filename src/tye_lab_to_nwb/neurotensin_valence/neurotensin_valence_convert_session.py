@@ -12,7 +12,7 @@ def session_to_nwb(
     output_dir_path: FilePathType,
     plexon_file_path: FilePathType,
     events_file_path: FilePathType,
-    histology_file_path: FilePathType,
+    histology_source_data: dict[str, str],
     events_conversion_options: Optional[dict] = None,
     pose_estimation_source_data: Optional[dict] = None,
     pose_estimation_conversion_options: Optional[dict] = None,
@@ -57,7 +57,7 @@ def session_to_nwb(
     )
 
     # Add confocal images
-    source_data.update(dict(Images=dict(file_path=histology_file_path)))
+    source_data.update(dict(Images=histology_source_data))
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
 
@@ -119,8 +119,11 @@ if __name__ == "__main__":
     events_column_mappings = dict(onset="start_time", offset="stop_time")
     events_conversion_options = dict(column_name_mapping=events_column_mappings)
 
-    # The file path to the Olympus Image File (.oif)
-    histology_file_path = "Hao_NWB/histo/H28PVT_40x.oif"
+    # Add histology source data
+    histology_source_data = dict(
+        file_path="Hao_NWB/histo/H28PVT_40x.oif",  # The file path to the Olympus Image File (.oif)
+        composite_tif_file_path="Hao_NWB/histo/H28_MAX_Composite.tif",  # The file path to the aggregated confocal images in TIF format.
+    )
 
     output_dir_path = Path("Hao_NWB/nwbfiles")
     stub_test = False
@@ -129,7 +132,7 @@ if __name__ == "__main__":
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         events_file_path=events_mat_file_path,
-        histology_file_path=histology_file_path,
+        histology_source_data=histology_source_data,
         events_conversion_options=events_conversion_options,
         plexon_file_path=plexon_file_path,
         pose_estimation_source_data=pose_estimation_source_data,

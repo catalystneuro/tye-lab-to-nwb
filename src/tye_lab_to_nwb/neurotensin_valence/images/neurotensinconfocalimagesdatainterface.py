@@ -11,6 +11,7 @@ from oiffile import OifFile
 from pynwb import NWBFile
 from pynwb.base import Images
 from pynwb.image import GrayscaleImage
+from tifffile import tifffile
 
 
 class NeurotensinConfocalImagesInterface(BaseDataInterface):
@@ -19,6 +20,7 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
     def __init__(
         self,
         file_path: FilePathType,
+        composite_tif_file_path: FilePathType,
         verbose: bool = True,
     ):
         """
@@ -28,11 +30,14 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         ----------
         file_path : FilePathType
             path to the Olympus Image File (.OIF).
+        composite_tif_file_path: FilePathType
+            path to the aggregated confocal images in TIF format.
         verbose: bool, default: True
             controls verbosity.
         """
         self.verbose = verbose
         self.oif = OifFile(file_path)
+        self.composite_images = tifffile.memmap(composite_tif_file_path, mode="r")
 
         super().__init__(file_path=file_path)
 
@@ -73,6 +78,12 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
             image_description = f"The image intensity from {location} region at {depth_range[depth_num]} meters depth."
             images_metadata.append(dict(name=image_name, description=image_description))
 
+        # Add metadata for composite images
+        for channel_num in range(self.composite_images.shape[0]):
+            image_name = f"GrayScaleImage{channel_num + 1}Composite"
+            image_description = f"The image intensity from {location} region aggregated over depth."
+            images_metadata.append(dict(name=image_name, description=image_description))
+
         metadata_from_file["Images"].update(images=images_metadata)
         metadata = dict_deep_update(metadata, metadata_from_file)
         return metadata
@@ -108,6 +119,17 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
                     GrayscaleImage(
                         name=image_metadata["name"],
                         data=H5DataIO(image.T, compression=True),
+                        description=image_metadata["description"],
+                    )
+                )
+
+            # Add composite images
+            for image_ind in range(self.composite_images.shape[0]):
+                image_metadata = metadata["Images"]["images"][len(file_list) + image_ind]
+                images.add_image(
+                    GrayscaleImage(
+                        name=image_metadata["name"],
+                        data=H5DataIO(self.composite_images[image_ind].T, compression=True),
                         description=image_metadata["description"],
                     )
                 )
