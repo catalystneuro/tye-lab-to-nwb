@@ -58,6 +58,22 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         pose_estimation_config = pd.read_pickle(self.source_data["config_file_path"])
         return pose_estimation_data, pose_estimation_config
 
+    def get_original_timestamps(self) -> np.ndarray:
+        raise NotImplementedError(
+            "Unable to retrieve the original unaltered timestamps for this interface! "
+            "Define the `get_original_timestamps` method for this interface."
+        )
+
+    def get_timestamps(self) -> np.ndarray:
+        raise NotImplementedError(
+            "Unable to retrieve timestamps for this interface! Define the `get_timestamps` method for this interface."
+        )
+
+    def align_timestamps(self, aligned_timestamps: np.ndarray):
+        raise NotImplementedError(
+            "The protocol for synchronizing the timestamps of this interface has not been specified!"
+        )
+
     def run_conversion(
         self,
         nwbfile_path: OptionalFilePathType = None,
