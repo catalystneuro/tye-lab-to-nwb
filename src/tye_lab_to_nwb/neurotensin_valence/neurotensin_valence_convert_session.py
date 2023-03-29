@@ -56,6 +56,13 @@ def session_to_nwb(
         )
     )
 
+    # Add original video
+    source_data.update(
+        dict(
+            OriginalVideo=dict(file_paths=[pose_estimation_conversion_options["original_video_file_path"]]),
+        )
+    )
+
     # Add confocal images
     source_data.update(dict(Images=histology_source_data))
 
@@ -69,7 +76,7 @@ def session_to_nwb(
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    session_id = data_dir_path.stem
+    session_id = data_dir_path.parent.stem
     subject_id = session_id.split("_")[0]
     if "subject_id" not in metadata["Subject"]:
         metadata["Subject"].update(subject_id=subject_id)

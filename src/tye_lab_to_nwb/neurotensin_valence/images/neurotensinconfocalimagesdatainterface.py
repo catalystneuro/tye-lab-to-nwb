@@ -102,8 +102,8 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         nwbfile_path: Optional[str] = None,
         nwbfile: Optional[NWBFile] = None,
         metadata: Optional[dict] = None,
+        conversion_options: Optional[dict] = None,
         overwrite: bool = False,
-        **conversion_options,
     ):
         with make_or_load_nwbfile(
             nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose

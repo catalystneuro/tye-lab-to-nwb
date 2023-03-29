@@ -6,6 +6,7 @@ from neuroconv import NWBConverter
 from neuroconv.datainterfaces import (
     OpenEphysRecordingInterface,
     PlexonSortingInterface,
+    VideoInterface,
 )
 
 from tye_lab_to_nwb.neurotensin_valence.behavior import (
@@ -24,6 +25,7 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         PoseEstimation=NeurotensinDeepLabCutInterface,
         Events=NeurotensinEventsInterface,
         Images=NeurotensinConfocalImagesInterface,
+        OriginalVideo=VideoInterface,
     )
 
     def get_metadata_schema(self) -> dict:
