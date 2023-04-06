@@ -20,7 +20,7 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
     def __init__(
         self,
         file_path: FilePathType,
-        composite_tif_file_path: FilePathType,
+        composite_tif_file_path: Optional[FilePathType] = None,
         verbose: bool = True,
     ):
         """
@@ -37,14 +37,16 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         """
         self.verbose = verbose
         self.oif = OifFile(file_path)
-        self.composite_images = tifffile.memmap(composite_tif_file_path, mode="r")
+        self.composite_images = None
+        if composite_tif_file_path:
+            self.composite_images = tifffile.memmap(composite_tif_file_path, mode="r")
 
         super().__init__(file_path=file_path)
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
 
-        metadata_from_file = dict()
+        metadata_from_oif_file = dict()
         settings = self.oif.filesystem.settings
 
         # Add session_start_time
@@ -52,8 +54,10 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         metadata["NWBFile"].update(session_start_time=datetime.fromisoformat(session_start_time))
 
         image_file_name = settings.name  # 'H28PVT_40x.oif'
-        subject_id, location = re.search("([a-zA-Z]+\d+)([^_]+)", image_file_name).groups()
-        metadata_from_file["Subject"] = dict(subject_id=subject_id)
+        file_name_regex_result = re.search("([a-zA-Z]+\d+)([^_]+)", image_file_name)
+        if file_name_regex_result is not None:
+            subject_id, location = re.search("([a-zA-Z]+\d+)([^_]+)", image_file_name).groups()
+            metadata_from_oif_file["Subject"] = dict(subject_id=subject_id)
 
         software_name = settings["Version Info"]["SystemName"]  # 'FLUOVIEW FV1000'
         software_version = settings["Version Info"]["FileVersion"]  # '1.2.6.0'
@@ -61,31 +65,42 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         # axis_order = self.oif.axes  # 'ZCYX' depth, ch, width, height
 
         depth_settings = settings["Axis 3 Parameters Common"]
-        depth_range = np.arange(
-            depth_settings["StartPosition"],
-            depth_settings["EndPosition"] + depth_settings["Interval"],
-            depth_settings["Interval"],
-        )
-        depth_range /= 1e6  # nm to m
-        metadata_from_file["Images"] = dict(
+        depth_range = []
+        if all([pos in depth_settings for pos in ["StartPosition", "EndPosition", "Interval"]]):
+            start = depth_settings["StartPosition"]
+            stop = depth_settings["EndPosition"]
+            step = depth_settings["Interval"]
+            if start > stop:
+                step = -step
+
+            depth_range = np.arange(start, stop + step, step)
+            if "UnitName" in depth_settings:
+                if depth_settings["UnitName"] == "nm":
+                    depth_range /= 1e9  # nm to m
+
+        metadata_from_oif_file["Images"] = dict(
             name=self.oif.filesystem.name,
             description=f"The {location} confocal images from {software_name} version {software_version} extracted from {image_file_name}.",
         )
 
         images_metadata = []
+        num_depths = len(set([indices[1] for indices in self.oif.series[0].indices]))
         for channel_num, depth_num in self.oif.series[0].indices:
             image_name = f"GrayScaleImage{channel_num+1}Depth{depth_num+1}"
-            image_description = f"The image intensity from {location} region at {depth_range[depth_num]} meters depth."
+            image_description = f"The image intensity from {location} region"
+            if len(depth_range) == num_depths:
+                image_description += f" at {depth_range[depth_num]} meters depth."
             images_metadata.append(dict(name=image_name, description=image_description))
 
         # Add metadata for composite images
-        for channel_num in range(self.composite_images.shape[0]):
-            image_name = f"GrayScaleImage{channel_num + 1}Composite"
-            image_description = f"The image intensity from {location} region aggregated over depth."
-            images_metadata.append(dict(name=image_name, description=image_description))
+        if self.composite_images is not None:
+            for channel_num in range(self.composite_images.shape[0]):
+                image_name = f"GrayScaleImage{channel_num + 1}Composite"
+                image_description = f"The image intensity from {location} region aggregated over depth."
+                images_metadata.append(dict(name=image_name, description=image_description))
 
-        metadata_from_file["Images"].update(images=images_metadata)
-        metadata = dict_deep_update(metadata, metadata_from_file)
+        metadata_from_oif_file["Images"].update(images=images_metadata)
+        metadata = dict_deep_update(metadata, metadata_from_oif_file)
         return metadata
 
     def align_timestamps(self, aligned_timestamps: np.ndarray):
@@ -124,14 +139,15 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
                 )
 
             # Add composite images
-            for image_ind in range(self.composite_images.shape[0]):
-                image_metadata = metadata["Images"]["images"][len(file_list) + image_ind]
-                images.add_image(
-                    GrayscaleImage(
-                        name=image_metadata["name"],
-                        data=H5DataIO(self.composite_images[image_ind].T, compression=True),
-                        description=image_metadata["description"],
+            if self.composite_images is not None:
+                for image_ind in range(self.composite_images.shape[0]):
+                    image_metadata = metadata["Images"]["images"][len(file_list) + image_ind]
+                    images.add_image(
+                        GrayscaleImage(
+                            name=image_metadata["name"],
+                            data=H5DataIO(self.composite_images[image_ind].T, compression=True),
+                            description=image_metadata["description"],
+                        )
                     )
-                )
 
             nwbfile_out.add_acquisition(images)
