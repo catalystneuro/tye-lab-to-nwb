@@ -1,4 +1,5 @@
 """Primary class for converting experiment-specific behavior."""
+import pickle
 from pathlib import Path
 from typing import Optional
 
@@ -23,7 +24,7 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
     def __init__(
         self,
         file_path: FilePathType,
-        config_file_path: FilePathType,
+        config_file_path: Optional[FilePathType] = None,
         verbose: bool = True,
     ):
         """
@@ -33,13 +34,14 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         ----------
         file_path : FilePathType
             path to the CSV file output by DeepLabCut GUI.
-        config_file_path : FilePathType
+        config_file_path : FilePathType, optional
             path to .pickle config file output by DeepLabCut GUI.
         verbose: bool, default: True
             controls verbosity.
         """
         self.verbose = verbose
-        super().__init__(file_path=file_path, config_file_path=config_file_path)
+        super().__init__(file_path=file_path)
+        self.config_file_path = config_file_path
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
@@ -55,8 +57,12 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         pose_estimation_data = pd.read_csv(self.source_data["file_path"], header=[0, 1, 2])
         # The first level contains the scorer, can be dropped from header (can be found also in conf)
         pose_estimation_data.columns = pose_estimation_data.columns.droplevel(0)
-        pose_estimation_config = pd.read_pickle(self.source_data["config_file_path"])
-        return pose_estimation_data, pose_estimation_config
+        return pose_estimation_data
+
+    def _load_pickle(self):
+        with open(self.config_file_path, "rb") as handle:
+            pickled = pickle.load(handle)
+        return pickled
 
     def get_original_timestamps(self) -> np.ndarray:
         raise NotImplementedError(
@@ -81,6 +87,8 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         metadata: Optional[dict] = None,
         original_video_file_path: OptionalFilePathType = None,
         labeled_video_file_path: OptionalFilePathType = None,
+        rate: Optional[float] = None,
+        starting_time: Optional[float] = None,
         edges: Optional[ArrayType] = None,
         column_mappings: Optional[dict] = None,
         overwrite: bool = False,
@@ -88,9 +96,21 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         with make_or_load_nwbfile(
             nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
         ) as nwbfile_out:
-            pose_estimation_data, pose_estimation_config = self._load_source_data()
+            pose_estimation_data = self._load_source_data()
+            pose_estimation_kwargs_from_pickle = dict()
+            if self.config_file_path is not None:
+                pose_estimation_config = self._load_pickle()
+                rate = pose_estimation_config["data"]["fps"]
+                pose_estimation_kwargs_from_pickle = dict(
+                    scorer=pose_estimation_config["data"]["Scorer"],
+                    # frame_dimensions are in height x width, but for NWB it should be width x height
+                    dimensions=np.array([pose_estimation_config["data"]["frame_dimensions"][::-1]], dtype=np.uint16),
+                )
 
             pose_estimation_metadata = metadata["PoseEstimation"]
+            assert (
+                rate is not None
+            ), "The 'rate' must be specified when the sampling frequency cannot be read from the configuration (.pickle) file."
 
             pose_estimation_series = []
             for column_name in pose_estimation_metadata:
@@ -103,8 +123,8 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
                         data=pose_estimation_series_data[["x", "y"]].values,
                         unit="px",
                         reference_frame="(0,0) corresponds to the top left corner of the cage.",
-                        rate=pose_estimation_config["data"]["fps"],
-                        starting_time=0.0,  # TODO
+                        rate=rate,
+                        starting_time=starting_time or 0.0,
                         confidence=pose_estimation_series_data["likelihood"].values,
                         confidence_definition=pose_estimation_metadata[column_name]["confidence_definition"],
                     )
@@ -113,18 +133,17 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
             # The parameters for the pose estimation container
             pose_estimation_kwargs = dict(
                 pose_estimation_series=pose_estimation_series,
-                # frame_dimensions are in height x width, but for NWB it should be width x height
-                dimensions=np.array([pose_estimation_config["data"]["frame_dimensions"][::-1]], dtype=np.uint16),
-                scorer=pose_estimation_config["data"]["Scorer"],
                 source_software="DeepLabCut",
                 nodes=[pose_estimation_metadata[column_name]["name"] for column_name in pose_estimation_metadata],
-                edges=np.asarray(edges, dtype=np.uint8),
+                **pose_estimation_kwargs_from_pickle,
             )
 
             if original_video_file_path is not None:
                 pose_estimation_kwargs.update(original_videos=[original_video_file_path])
             if labeled_video_file_path is not None:
                 pose_estimation_kwargs.update(labeled_videos=[labeled_video_file_path])
+            if edges is not None:
+                pose_estimation_kwargs.update(edges=np.asarray(edges, dtype=np.uint8))
 
             # Create the container for pose estimation
             pose_estimation = PoseEstimation(**pose_estimation_kwargs)
