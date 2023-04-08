@@ -50,7 +50,7 @@ def session_to_nwb(
             6: "neutral_stimulus_presentation",
         }
         read_kwargs = dict(event_names_mapping=event_names_mapping)
-        events_source_data = dict(file_path=events_file_path, read_kwargs=read_kwargs)
+        events_source_data = dict(file_path=str(events_file_path), read_kwargs=read_kwargs)
         source_data.update(dict(Events=events_source_data))
 
         events_column_mappings = dict(onset="start_time", offset="stop_time")
@@ -62,7 +62,7 @@ def session_to_nwb(
         )
 
     # Add pose estimation (optional)
-    if pose_estimation_source_data is not None:
+    if pose_estimation_source_data:
         source_data.update(dict(PoseEstimation=pose_estimation_source_data))
         if "config_file_path" not in pose_estimation_source_data:
             assert (
@@ -70,7 +70,7 @@ def session_to_nwb(
             ), "The 'rate' must be specified when the sampling frequency cannot be read from the configuration (.pickle) file."
         conversion_options.update(dict(PoseEstimation=pose_estimation_conversion_options))
 
-    if pose_estimation_conversion_options is not None:
+    if pose_estimation_conversion_options:
         if "original_video_file_path" in pose_estimation_conversion_options:
             source_data.update(
                 dict(
@@ -79,7 +79,7 @@ def session_to_nwb(
             )
 
     # Add confocal images
-    if histology_source_data is not None:
+    if histology_source_data:
         source_data.update(dict(Images=histology_source_data))
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
@@ -92,7 +92,7 @@ def session_to_nwb(
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    ecephys_folder_name = ecephys_recording_folder_path.parent.name
+    ecephys_folder_name = ecephys_recording_folder_path.name
     filename_regex_result = re.search("([a-zA-Z]+\d+)_(.*)", ecephys_folder_name)
     if filename_regex_result is not None:
         subject_id, session_id = filename_regex_result.groups()
@@ -114,13 +114,15 @@ def session_to_nwb(
     nwbfile_path = output_dir_path / nwbfile_name
 
     # Run conversion
-    converter.run_conversion(metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options)
+    converter.run_conversion(
+        metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=True
+    )
 
 
 if __name__ == "__main__":
     # Parameters for conversion
     # The path that points to the folder where the OpenEphys (.continuous) files are located.
-    ecephys_folder_path = Path("Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/openephys")
+    ecephys_folder_path = Path("Hao_NWB/recording/H28_2020-02-19_14-27-39_Disc3_20k")
 
     # The path that points to the Plexon file (optional)
     # plexon_file_path = None
@@ -128,12 +130,10 @@ if __name__ == "__main__":
 
     # Parameters for pose estimation data (optional)
     # The file path that points to the DLC output (.CSV file)
-    # pose_estimation_file_path = None
     pose_estimation_file_path = (
         "Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
     )
     # The file path that points to the DLC configuration file (.pickle file), optional
-    # pose_estimation_config_file_path = None
     pose_estimation_config_file_path = (
         "Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
     )
@@ -158,9 +158,8 @@ if __name__ == "__main__":
 
     # Parameters for histology images (optional)
     # Add histology source data (optional)
-    # histology_source_data = None
     histology_source_data = dict(
-        file_path="Hao_NWB/histo/H28PVT_40x.oif",  # The file path to the Olympus Image File (.oif)
+        file_path="/Volumes/t7-ssd/Hao_NWB/problem_histo/H31PVT_40x.oif",  # The file path to the Olympus Image File (.oif)
         composite_tif_file_path="Hao_NWB/histo/H28_MAX_Composite.tif",  # The file path to the aggregated confocal images in TIF format.
     )
 
