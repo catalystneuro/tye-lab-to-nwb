@@ -114,9 +114,7 @@ def session_to_nwb(
     nwbfile_path = output_dir_path / nwbfile_name
 
     # Run conversion
-    converter.run_conversion(
-        metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options, overwrite=True
-    )
+    converter.run_conversion(metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options)
 
 
 if __name__ == "__main__":
