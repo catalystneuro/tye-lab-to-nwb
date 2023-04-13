@@ -1,7 +1,8 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
-import re
+import traceback
 from pathlib import Path
 from typing import Optional, Dict
+from warnings import warn
 
 from neuroconv.utils import (
     load_dict_from_file,
@@ -9,20 +10,58 @@ from neuroconv.utils import (
     FilePathType,
     FolderPathType,
 )
+from nwbinspector import inspect_nwb
+from nwbinspector.inspector_tools import save_report, format_messages
 
 from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
 
 
 def session_to_nwb(
+    nwbfile_path: FilePathType,
     ecephys_recording_folder_path: FolderPathType,
-    output_dir_path: FilePathType,
+    subject_metadata: Optional[Dict[str, str]] = None,
     plexon_file_path: Optional[FilePathType] = None,
     events_file_path: Optional[FilePathType] = None,
-    histology_source_data: Optional[Dict[str, str]] = None,
-    pose_estimation_source_data: Optional[Dict[str, str]] = None,
-    pose_estimation_conversion_options: Optional[Dict[str, str]] = None,
+    pose_estimation_file_path: Optional[FilePathType] = None,
+    pose_estimation_config_file_path: Optional[FilePathType] = None,
+    original_video_file_path: Optional[FilePathType] = None,
+    labeled_video_file_path: Optional[FilePathType] = None,
+    confocal_images_oif_file_path: Optional[FilePathType] = None,
+    confocal_images_composite_tif_file_path: Optional[FilePathType] = None,
     stub_test: bool = False,
 ):
+    """
+    Converts a single session to NWB.
+
+    Parameters
+    ----------
+    nwbfile_path : FilePathType
+        The file path to the NWB file that will be created.
+    ecephys_recording_folder_path: FolderPathType
+         The path that points to the folder where the OpenEphys (.continuous) files are located.
+    subject_metadata: dict, optional
+        The optional metadata for the experimental subject.
+    plexon_file_path: FilePathType, optional
+        The path that points to the Plexon (.plx) file that contains the spike times.
+    events_file_path: FilePathType, optional
+        The path that points to the .mat file that contains the event onset and offset times.
+    pose_estimation_file_path: FilePathType, optional
+        The path that points to the .csv file that contains the DLC output.
+    pose_estimation_config_file_path: FilePathType, optional
+        The path that points to the .pickle file that contains the DLC configuration settings.
+    original_video_file_path: FilePathType, optional
+        The path that points to the original behavior movie that was used for pose estimation.
+    labeled_video_file_path: FilePathType, optional
+        The path that points to the labeled behavior movie.
+    confocal_images_oif_file_path: FilePathType, optional
+        The path that points to the Olympus Image File (.oif).
+    confocal_images_composite_tif_file_path: FilePathType, optional
+        The path that points to the TIF image that contains the confocal images aggregated over depth.
+    stub_test: bool, optional
+        For testing purposes, when stub_test=True only writes a subset of ecephys and plexon data.
+        Default is to write the whole ecephys recording and plexon data to the file.
+    """
+
     ecephys_recording_folder_path = Path(ecephys_recording_folder_path)
 
     source_data = dict()
@@ -62,25 +101,39 @@ def session_to_nwb(
         )
 
     # Add pose estimation (optional)
-    if pose_estimation_source_data:
+    pose_estimation_source_data = dict()
+    if pose_estimation_file_path:
+        pose_estimation_source_data.update(file_path=str(pose_estimation_file_path))
+        if pose_estimation_config_file_path:
+            pose_estimation_source_data.update(config_file_path=str(pose_estimation_config_file_path))
+
         source_data.update(dict(PoseEstimation=pose_estimation_source_data))
-        if "config_file_path" not in pose_estimation_source_data:
-            assert (
-                "rate" in pose_estimation_conversion_options
-            ), "The 'rate' must be specified when the sampling frequency cannot be read from the configuration (.pickle) file."
+
+    pose_estimation_conversion_options = dict()
+    if original_video_file_path:
+        pose_estimation_conversion_options.update(original_video_file_path=original_video_file_path)
+        source_data.update(
+            dict(
+                OriginalVideo=dict(file_paths=[str(original_video_file_path)]),
+            )
+        )
+    if labeled_video_file_path:
+        pose_estimation_conversion_options.update(labeled_video_file_path=labeled_video_file_path)
+
+    if pose_estimation_source_data:
+        # The edges between the nodes (e.g. labeled body parts) defined as array of pairs of indices.
+        edges = [(0, 1), (0, 2), (2, 3), (1, 3), (5, 6), (5, 7), (5, 8), (5, 9)]
+        pose_estimation_conversion_options.update(edges=edges)
         conversion_options.update(dict(PoseEstimation=pose_estimation_conversion_options))
 
-    if pose_estimation_conversion_options:
-        if "original_video_file_path" in pose_estimation_conversion_options:
-            source_data.update(
-                dict(
-                    OriginalVideo=dict(file_paths=[pose_estimation_conversion_options["original_video_file_path"]]),
-                )
-            )
-
     # Add confocal images
-    if histology_source_data:
-        source_data.update(dict(Images=histology_source_data))
+    images_source_data = dict()
+    if confocal_images_oif_file_path:
+        images_source_data.update(file_path=str(confocal_images_oif_file_path))
+        if confocal_images_composite_tif_file_path:
+            images_source_data.update(composite_tif_file_path=str(confocal_images_composite_tif_file_path))
+
+        source_data.update(dict(Images=images_source_data))
 
     converter = NeurotensinValenceNWBConverter(source_data=source_data)
 
@@ -92,29 +145,40 @@ def session_to_nwb(
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    ecephys_folder_name = ecephys_recording_folder_path.name
-    filename_regex_result = re.search("([a-zA-Z]+\d+)_(.*)", ecephys_folder_name)
-    if filename_regex_result is not None:
-        subject_id, session_id = filename_regex_result.groups()
-        if "subject_id" not in metadata["Subject"]:
-            metadata["Subject"].update(subject_id=subject_id)
-        if "session_id" not in metadata["NWBFile"]:
-            metadata["NWBFile"].update(session_id=session_id.replace("_", "-"))
+    if subject_metadata:
+        metadata = dict_deep_update(metadata, dict(Subject=subject_metadata))
 
-    if "subject_id" in metadata["Subject"]:
-        output_dir_path = Path(output_dir_path) / f"sub-{metadata['Subject']['subject_id']}"
+    if "session_id" not in metadata["NWBFile"]:
+        ecephys_folder_name = ecephys_recording_folder_path.name
+        session_id = ecephys_folder_name.replace(" ", "").replace("_", "-")
+        metadata["NWBFile"].update(session_id=session_id)
+
+    nwbfile_path = Path(nwbfile_path)
+    nwbfile_name = nwbfile_path.name
     if stub_test:
-        output_dir_path = Path(output_dir_path) / "nwb_stub"
-    output_dir_path.mkdir(parents=True, exist_ok=True)
+        nwbfile_path = nwbfile_path.parent / "nwb_stub" / nwbfile_name
+    nwbfile_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if "subject_id" in metadata["Subject"] and "session_id" in metadata["NWBFile"]:
-        nwbfile_name = f"sub-{subject_id}_ses-{session_id}.nwb"
-    else:
-        nwbfile_name = f"{ecephys_folder_name}.nwb"
-    nwbfile_path = output_dir_path / nwbfile_name
+    try:
+        # Run conversion
+        converter.run_conversion(
+            nwbfile_path=str(nwbfile_path), metadata=metadata, conversion_options=conversion_options
+        )
 
-    # Run conversion
-    converter.run_conversion(metadata=metadata, nwbfile_path=nwbfile_path, conversion_options=conversion_options)
+        # Run inspection for nwbfile
+        results = list(inspect_nwb(nwbfile_path=nwbfile_path))
+        report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
+        save_report(
+            report_file_path=report_path,
+            formatted_messages=format_messages(
+                results,
+                levels=["importance", "file_path"],
+            ),
+        )
+    except Exception as e:
+        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+            f.write(traceback.format_exc())
+        warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
 
 if __name__ == "__main__":
@@ -126,54 +190,59 @@ if __name__ == "__main__":
     # plexon_file_path = None
     plexon_file_path = Path("Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/0028_20200221_20k.plx")
 
+    # Parameters for events data (optional)
+    # The file path that points to the events.mat file
+    # events_mat_file_path = None
+    events_mat_file_path = Path(
+        "/Volumes/t7-ssd/Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/0028_20200221_20k_events.mat"
+    )
+
     # Parameters for pose estimation data (optional)
     # The file path that points to the DLC output (.CSV file)
+    # pose_estimation_file_path = None
     pose_estimation_file_path = (
         "Hao_NWB/behavior/freezing_DLC/28_Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000.csv"
     )
     # The file path that points to the DLC configuration file (.pickle file), optional
+    # pose_estimation_config_file_path = None
     pose_estimation_config_file_path = (
         "Hao_NWB/behavior/freezing_DLC/H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000includingmetadata.pickle"
     )
-    pose_estimation_source_data = dict(
-        file_path=pose_estimation_file_path,
-        config_file_path=pose_estimation_config_file_path,
-    )
-
-    # The edges between the nodes (e.g. labeled body parts) defined as array of pairs of indices.
-    edges = [(0, 1), (0, 2), (2, 3), (1, 3), (5, 6), (5, 7), (5, 8), (5, 9)]
-    pose_estimation_conversion_options = dict(
-        original_video_file_path="H028Disc4.mkv",
-        labeled_video_file_path="H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000_labeled.mp4",
-        edges=edges,
-        # rate=30.0,  # Specifying 'rate' is necessary when the DLC configuration (.pickle) file is not available.
-    )
-
-    # Parameters for events data (optional)
-    # The file path that points to the events.mat file
-    # events_mat_file_path = None
-    events_mat_file_path = Path("Hao_NWB/recording/H28_2020-02-20_13-43-12_Disc4_20k/0028_20200221_20k_events.mat")
+    # The file path that points to the behavior movie file, optional
+    # original_video_file_path = None
+    original_video_file_path = "H028Disc4.mkv"
+    # The file path that points to the labeled behavior movie file, optional
+    # labeled_video_file_path = None
+    labeled_video_file_path = "H028Disc4DLC_resnet50_Hao_MedPC_ephysFeb9shuffle1_800000_labeled.mp4"
 
     # Parameters for histology images (optional)
-    # Add histology source data (optional)
-    histology_source_data = dict(
-        file_path="/Volumes/t7-ssd/Hao_NWB/problem_histo/H31PVT_40x.oif",  # The file path to the Olympus Image File (.oif)
-        composite_tif_file_path="Hao_NWB/histo/H28_MAX_Composite.tif",  # The file path to the aggregated confocal images in TIF format.
-    )
+    # The file path to the Olympus Image File (.oif)
+    confocal_images_oif_file_path = "Hao_NWB/problem_histo/H31PVT_40x.oif"
+    # The file path to the aggregated confocal images in TIF format.
+    # confocal_images_composite_tif_file_path = None
+    confocal_images_composite_tif_file_path = "Hao_NWB/histo/H28_MAX_Composite.tif"
 
-    # The folder path where the NWB file will be created.
-    nwbfile_folder_path = Path("Hao_NWB/nwbfiles")
+    # The file path where the NWB file will be created.
+    nwbfile_path = Path("Hao_NWB/nwbfiles/test.nwb")
+
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
     stub_test = False
 
+    # subject metadata (optional)
+    subject_metadata = dict(sex="M")
+
     session_to_nwb(
+        nwbfile_path=nwbfile_path,
         ecephys_recording_folder_path=ecephys_folder_path,
-        output_dir_path=nwbfile_folder_path,
+        subject_metadata=subject_metadata,
         plexon_file_path=plexon_file_path,
         events_file_path=events_mat_file_path,
-        histology_source_data=histology_source_data,
-        pose_estimation_source_data=pose_estimation_source_data,
-        pose_estimation_conversion_options=pose_estimation_conversion_options,
+        pose_estimation_file_path=pose_estimation_file_path,
+        pose_estimation_config_file_path=pose_estimation_config_file_path,
+        original_video_file_path=original_video_file_path,
+        labeled_video_file_path=labeled_video_file_path,
+        confocal_images_oif_file_path=confocal_images_oif_file_path,
+        confocal_images_composite_tif_file_path=confocal_images_composite_tif_file_path,
         stub_test=stub_test,
     )
