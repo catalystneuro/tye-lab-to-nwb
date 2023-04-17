@@ -74,7 +74,7 @@ def parallel_convert_sessions(
                         labeled_video_file_path=row["behavior_labeled_movie_file_path"],
                         confocal_images_oif_file_path=row["confocal_images_oif_file_path"],
                         confocal_images_composite_tif_file_path=row["confocal_images_composite_tif_file_path"],
-                        stub_test=True,
+                        stub_test=False,
                     )
                 )
             for future in as_completed(futures):
