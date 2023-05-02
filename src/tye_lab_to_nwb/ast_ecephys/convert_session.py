@@ -15,6 +15,8 @@ def session_to_nwb(
     ecephys_recording_folder_path: FolderPathType,
     plexon_file_path: Optional[FilePathType] = None,
     events_file_path: Optional[FilePathType] = None,
+    sleap_file_path: Optional[FilePathType] = None,
+    video_file_path: Optional[FilePathType] = None,
     subject_metadata: Optional[Dict[str, str]] = None,
     stub_test: Optional[bool] = False,
 ):
@@ -31,6 +33,10 @@ def session_to_nwb(
         The path that points to the Plexon (.plx) file that contains the spike times.
     events_file_path: FilePathType, optional
         The path that points to the .mat file that contains the event onset and offset times.
+    sleap_file_path: FilePathType, optional
+        The path that points to the .slp file that contains the SLEAP output.
+    video_file_path: FilePathType, optional
+        The path that points to the video file for SLEAP input.
     subject_metadata: dict, optional
         The optional metadata for the experimental subject.
     stub_test: bool, optional
@@ -72,6 +78,17 @@ def session_to_nwb(
                 Events=events_conversion_options,
             )
         )
+
+    # Add pose estimation (optional)
+    if sleap_file_path:
+        sleap_source_data = dict(Behavior=dict(file_path=str(sleap_file_path)))
+        source_data.update(sleap_source_data)
+        if video_file_path:
+            sleap_source_data["Behavior"].update(video_file_path=str(video_file_path))
+
+    # Add video (optional)
+    if video_file_path:
+        source_data.update(dict(Video=dict(file_paths=[str(video_file_path)])))
 
     converter = AStEcephysNWBConverter(source_data=source_data)
 
@@ -121,6 +138,13 @@ if __name__ == "__main__":
     # events_mat_file_path = None
     events_mat_file_path = ecephys_folder_path / "3014_20180626_illidanDiscD4_events.mat"
 
+    # Parameters for pose estimation data (optional)
+    # The file path that points to the SLEAP output (.slp) file
+    # sleap_file_path = None
+    sleap_file_path = Path("/Volumes/t7-ssd/SLEAP/predictions/3014illidan_20180926_DiscD4.predictions.slp")
+    # The file path that points to the source video for pose estimation
+    video_file_path = Path("/Volumes/t7-ssd/SLEAP/sourceVids/FFBatch/3014illidan_20180926_DiscD4.mp4")
+
     # The file path where the NWB file will be created.
     nwbfile_path = Path("/Volumes/t7-ssd/Fergil_NWB/nwbfiles/3014_illidanDiscD4_ecephys.nwb")
 
@@ -136,6 +160,8 @@ if __name__ == "__main__":
         ecephys_recording_folder_path=ecephys_folder_path,
         plexon_file_path=plexon_file_path,
         events_file_path=events_mat_file_path,
+        sleap_file_path=sleap_file_path,
+        video_file_path=video_file_path,
         subject_metadata=subject_metadata,
         stub_test=stub_test,
     )
