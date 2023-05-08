@@ -1,5 +1,6 @@
 from neuroconv import NWBConverter
 from neuroconv.datainterfaces import OpenEphysRecordingInterface, PlexonSortingInterface, SLEAPInterface, VideoInterface
+from tye_lab_to_nwb.ast_ecephys.ast_sortinginterface import AstSortingInterface
 from tye_lab_to_nwb.neurotensin_valence.behavior import NeurotensinEventsInterface
 
 
@@ -12,4 +13,5 @@ class AStEcephysNWBConverter(NWBConverter):
         Events=NeurotensinEventsInterface,
         Recording=OpenEphysRecordingInterface,
         Sorting=PlexonSortingInterface,
+        FilteredSorting=AstSortingInterface,
     )

@@ -14,6 +14,7 @@ def session_to_nwb(
     nwbfile_path: FilePathType,
     ecephys_recording_folder_path: FolderPathType,
     plexon_file_path: Optional[FilePathType] = None,
+    group_mat_file_path: Optional[FilePathType] = None,
     events_file_path: Optional[FilePathType] = None,
     sleap_file_path: Optional[FilePathType] = None,
     video_file_path: Optional[FilePathType] = None,
@@ -31,6 +32,9 @@ def session_to_nwb(
         The path that points to the folder where the OpenEphys (.continuous) files are located.
     plexon_file_path: FilePathType, optional
         The path that points to the Plexon (.plx) file that contains the spike times.
+    group_mat_file_path: FilePathType, optional
+        The path that points to the MAT file with the manually clustered spikes and
+        the filtering criteria for the units.
     events_file_path: FilePathType, optional
         The path that points to the .mat file that contains the event onset and offset times.
     sleap_file_path: FilePathType, optional
@@ -55,7 +59,27 @@ def session_to_nwb(
     # Add Sorting (optional)
     if plexon_file_path:
         source_data.update(dict(Sorting=dict(file_path=str(plexon_file_path))))
-        conversion_options.update(dict(Sorting=dict(stub_test=stub_test)))
+        conversion_options.update(
+            dict(
+                Sorting=dict(
+                    stub_test=False,
+                    write_as="processing",
+                    units_name="manual_curated_units",
+                    units_description=f"The manually clustered units exported from '{str(plexon_file_path)}'.",
+                )
+            )
+        )
+
+    if group_mat_file_path:
+        source_data.update(dict(FilteredSorting=dict(file_path=str(group_mat_file_path))))
+        conversion_options.update(
+            dict(
+                FilteredSorting=dict(
+                    stub_test=False,
+                    units_description="The clustered units after exluding duplicated, low-quality (any units with 2 or lower excluded) and low-firing (units with less than 1000 spikes) units.",
+                )
+            )
+        )
 
     if events_file_path:
         event_names_mapping = {
@@ -119,6 +143,7 @@ def session_to_nwb(
         nwbfile_path=str(nwbfile_path),
         metadata=metadata,
         conversion_options=conversion_options,
+        overwrite=True,
     )
 
 
@@ -133,6 +158,10 @@ if __name__ == "__main__":
     # plexon_file_path = None
     plexon_file_path = ecephys_folder_path / "3014_20180626_illidanDiscD4_sort.plx"
 
+    # The path that points to the MAT file with the manually clustered spikes and
+    # the filtering criteria for the units
+    group_mat_file_path = "/Volumes/t7-ssd/OpenEphys/Group_data/Disc_bin100/3014_20180626_illidanDiscD4_proc.mat"
+
     # Parameters for events data (optional)
     # The file path that points to the events.mat file
     # events_mat_file_path = None
@@ -146,7 +175,7 @@ if __name__ == "__main__":
     video_file_path = Path("/Volumes/t7-ssd/SLEAP/sourceVids/FFBatch/3014illidan_20180926_DiscD4.mp4")
 
     # The file path where the NWB file will be created.
-    nwbfile_path = Path("/Volumes/t7-ssd/Fergil_NWB/nwbfiles/3014_illidanDiscD4_ecephys.nwb")
+    nwbfile_path = Path("/Volumes/t7-ssd/Fergil_NWB/nwbfiles/3014_illidanDiscD4_filtered_sorting_ecephys_behavior.nwb")
 
     # subject metadata (optional)
     subject_metadata = dict(sex="M", subject_id="3014")
@@ -159,6 +188,7 @@ if __name__ == "__main__":
         nwbfile_path=nwbfile_path,
         ecephys_recording_folder_path=ecephys_folder_path,
         plexon_file_path=plexon_file_path,
+        group_mat_file_path=group_mat_file_path,
         events_file_path=events_mat_file_path,
         sleap_file_path=sleap_file_path,
         video_file_path=video_file_path,
