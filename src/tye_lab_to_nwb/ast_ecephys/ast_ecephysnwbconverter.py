@@ -27,6 +27,7 @@ class AStEcephysNWBConverter(NWBConverter):
 
     def get_metadata(self):
         metadata = super().get_metadata()
+
         start_times = []
         for interface in self.data_interface_objects.values():
             interface_metadata = interface.get_metadata()
