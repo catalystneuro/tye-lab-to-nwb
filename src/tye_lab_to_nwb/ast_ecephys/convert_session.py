@@ -64,8 +64,8 @@ def session_to_nwb(
                 Sorting=dict(
                     stub_test=False,
                     write_as="processing",
-                    units_name="manual_curated_units",
-                    units_description=f"The manually clustered units exported from '{str(plexon_file_path)}'.",
+                    units_name="uncurated_units",
+                    units_description="The uncurated units exported from the offline Plexon spike sorter.",
                 )
             )
         )
