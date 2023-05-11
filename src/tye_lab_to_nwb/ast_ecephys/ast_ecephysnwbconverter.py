@@ -28,16 +28,10 @@ class AStEcephysNWBConverter(NWBConverter):
     def get_metadata(self):
         metadata = super().get_metadata()
 
-        start_times = []
-        for interface in self.data_interface_objects.values():
-            interface_metadata = interface.get_metadata()
-            if "NWBFile" not in interface_metadata:
-                continue
-            if "session_start_time" in interface_metadata["NWBFile"]:
-                start_times.append(interface_metadata["NWBFile"]["session_start_time"])
-
-        # Use the earliest session_start_time
-        metadata["NWBFile"].update(session_start_time=min(start_times))
+        recording_interface = self.data_interface_objects["Recording"]
+        interface_metadata = recording_interface.get_metadata()
+        # Explicitly set session_start_time to OpenEphys recording start time
+        metadata["NWBFile"].update(session_start_time=interface_metadata["NWBFile"]["session_start_time"])
 
         return metadata
 
