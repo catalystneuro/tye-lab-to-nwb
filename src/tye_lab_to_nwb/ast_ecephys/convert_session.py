@@ -1,5 +1,10 @@
+import traceback
 from pathlib import Path
 from typing import Optional, Dict
+from warnings import warn
+
+from nwbinspector import inspect_nwb
+from nwbinspector.inspector_tools import format_messages, save_report
 
 from neuroconv.utils import (
     FilePathType,
@@ -8,6 +13,7 @@ from neuroconv.utils import (
     dict_deep_update,
 )
 from tye_lab_to_nwb.ast_ecephys import AStEcephysNWBConverter
+from tye_lab_to_nwb.tools import read_session_config
 
 
 def session_to_nwb(
@@ -62,7 +68,7 @@ def session_to_nwb(
         conversion_options.update(
             dict(
                 Sorting=dict(
-                    stub_test=False,
+                    stub_test=stub_test,
                     write_as="processing",
                     units_name="uncurated_units",
                     units_description="The uncurated units exported from the offline Plexon spike sorter.",
@@ -75,7 +81,7 @@ def session_to_nwb(
         conversion_options.update(
             dict(
                 FilteredSorting=dict(
-                    stub_test=False,
+                    stub_test=stub_test,
                     units_description="The clustered units after exluding duplicated, low-quality (any units with 2 or lower excluded) and low-firing (units with less than 1000 spikes) units.",
                 )
             )
@@ -138,60 +144,56 @@ def session_to_nwb(
         nwbfile_path = nwbfile_path.parent / "nwb_stub" / nwbfile_name
     nwbfile_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Run conversion
-    converter.run_conversion(
-        nwbfile_path=str(nwbfile_path),
-        metadata=metadata,
-        conversion_options=conversion_options,
-        overwrite=True,
-    )
+    try:
+        # Run conversion
+        converter.run_conversion(
+            nwbfile_path=str(nwbfile_path), metadata=metadata, conversion_options=conversion_options
+        )
+
+        # Run inspection for nwbfile
+        results = list(inspect_nwb(nwbfile_path=nwbfile_path))
+        report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
+        save_report(
+            report_file_path=report_path,
+            formatted_messages=format_messages(
+                results,
+                levels=["importance", "file_path"],
+            ),
+        )
+    except Exception as e:
+        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+            f.write(traceback.format_exc())
+        warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
 
 if __name__ == "__main__":
-    # Parameters for conversion
-    # The path that points to the folder where the OpenEphys (.continuous) files are located.
-    ecephys_folder_path = Path(
-        "/Volumes/t7-ssd/OpenEphys/3014_2018-06-26_14-21-37_illidanDiscD4",
-    )
+    # Parameters for converting a single session
+    # The path to the Excel (.xlsx) file that contains the file paths for each data stream.
+    # The number of rows in the file corresponds to the number of sessions that can be converted.
+    excel_file_path = Path("/Volumes/t7-ssd/OpenEphys/session_config.xlsx")
+    config = read_session_config(excel_file_path=excel_file_path)
+    # Choose which session will be converted by specifying the index of the row
+    row_index = 0
 
-    # The path that points to the Plexon file (optional)
-    # plexon_file_path = None
-    plexon_file_path = ecephys_folder_path / "3014_20180626_illidanDiscD4_sort.plx"
-
-    # The path that points to the MAT file with the manually clustered spikes and
-    # the filtering criteria for the units
-    group_mat_file_path = "/Volumes/t7-ssd/OpenEphys/Group_data/Disc_bin100/3014_20180626_illidanDiscD4_proc.mat"
-
-    # Parameters for events data (optional)
-    # The file path that points to the events.mat file
-    # events_mat_file_path = None
-    events_mat_file_path = ecephys_folder_path / "3014_20180626_illidanDiscD4_events.mat"
-
-    # Parameters for pose estimation data (optional)
-    # The file path that points to the SLEAP output (.slp) file
-    # sleap_file_path = None
-    sleap_file_path = Path("/Volumes/t7-ssd/SLEAP/predictions/3014illidan_20180926_DiscD4.predictions.slp")
-    # The file path that points to the source video for pose estimation
-    video_file_path = Path("/Volumes/t7-ssd/SLEAP/sourceVids/FFBatch/3014illidan_20180926_DiscD4.mp4")
-
-    # The file path where the NWB file will be created.
-    nwbfile_path = Path("/Volumes/t7-ssd/Fergil_NWB/nwbfiles/3014_illidanDiscD4_filtered_sorting_ecephys_behavior.nwb")
-
-    # subject metadata (optional)
-    subject_metadata = dict(sex="M", subject_id="3014")
+    # # Add subject metadata (optional)
+    subject_metadata = dict()
+    for subject_field in ["sex", "subject_id", "age", "genotype", "strain"]:
+        if config[subject_field][row_index]:
+            subject_metadata[subject_field] = str(config[subject_field][row_index])
 
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
     stub_test = False
 
+    # Run conversion for a single session
     session_to_nwb(
-        nwbfile_path=nwbfile_path,
-        ecephys_recording_folder_path=ecephys_folder_path,
-        plexon_file_path=plexon_file_path,
-        group_mat_file_path=group_mat_file_path,
-        events_file_path=events_mat_file_path,
-        sleap_file_path=sleap_file_path,
-        video_file_path=video_file_path,
+        nwbfile_path=config["nwbfile_path"][row_index],
+        ecephys_recording_folder_path=config["ecephys_folder_path"][row_index],
+        plexon_file_path=config["plexon_file_path"][row_index],
+        group_mat_file_path=config["group_mat_file_path"][row_index],
+        events_file_path=config["events_mat_file_path"][row_index],
+        sleap_file_path=config["sleap_file_path"][row_index],
+        video_file_path=config["video_file_path"][row_index],
         subject_metadata=subject_metadata,
         stub_test=stub_test,
     )
