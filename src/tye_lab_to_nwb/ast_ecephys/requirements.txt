@@ -1,2 +1,3 @@
 -e git+https://github.com/catalystneuro/neuroconv@main#egg=neuroconv
 neuroconv[openephys,plexon,sleap,video]
+openpyxl>=3.1.2
