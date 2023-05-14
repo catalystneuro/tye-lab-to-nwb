@@ -10,7 +10,7 @@ from neuroconv.datainterfaces import (
     VideoInterface,
 )
 from tye_lab_to_nwb.ast_ecephys.ast_sortinginterface import AstSortingInterface
-from tye_lab_to_nwb.neurotensin_valence.behavior import NeurotensinEventsInterface
+from tye_lab_to_nwb.general_interfaces import DiscriminationTaskEventsInterface
 
 
 class AStEcephysNWBConverter(NWBConverter):
@@ -19,7 +19,7 @@ class AStEcephysNWBConverter(NWBConverter):
     data_interface_classes = dict(
         Behavior=SLEAPInterface,
         Video=VideoInterface,
-        Events=NeurotensinEventsInterface,
+        Events=DiscriminationTaskEventsInterface,
         Recording=OpenEphysRecordingInterface,
         Sorting=PlexonSortingInterface,
         FilteredSorting=AstSortingInterface,
