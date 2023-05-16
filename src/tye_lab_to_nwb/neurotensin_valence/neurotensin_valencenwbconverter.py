@@ -8,11 +8,8 @@ from neuroconv.datainterfaces import (
     PlexonSortingInterface,
     VideoInterface,
 )
-
-from tye_lab_to_nwb.neurotensin_valence.behavior import (
-    NeurotensinDeepLabCutInterface,
-    NeurotensinEventsInterface,
-)
+from tye_lab_to_nwb.general_interfaces import DiscriminationTaskEventsInterface
+from tye_lab_to_nwb.neurotensin_valence.behavior import NeurotensinDeepLabCutInterface
 from tye_lab_to_nwb.neurotensin_valence.images import NeurotensinConfocalImagesInterface
 
 
@@ -23,7 +20,7 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         Recording=OpenEphysRecordingInterface,
         Sorting=PlexonSortingInterface,
         PoseEstimation=NeurotensinDeepLabCutInterface,
-        Events=NeurotensinEventsInterface,
+        Events=DiscriminationTaskEventsInterface,
         Images=NeurotensinConfocalImagesInterface,
         OriginalVideo=VideoInterface,
     )

@@ -1,2 +1,1 @@
 from .neurotensindeeplabcutdatainterface import NeurotensinDeepLabCutInterface
-from .neurotensineventsdatainterface import NeurotensinEventsInterface

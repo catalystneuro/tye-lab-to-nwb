@@ -7,7 +7,7 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from neuroconv.utils import FilePathType
 
 
-class NeurotensinEventsInterface(TimeIntervalsInterface):
+class DiscriminationTaskEventsInterface(TimeIntervalsInterface):
     def __init__(
         self,
         file_path: FilePathType,
@@ -15,6 +15,8 @@ class NeurotensinEventsInterface(TimeIntervalsInterface):
         verbose: bool = True,
     ):
         """
+        The interface for writing the discrimination task events.
+
         Parameters
         ----------
         file_path : FilePath
