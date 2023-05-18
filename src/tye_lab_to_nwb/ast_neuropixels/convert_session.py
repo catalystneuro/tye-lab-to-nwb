@@ -12,6 +12,7 @@ from neuroconv.utils import (
     load_dict_from_file,
     dict_deep_update,
     OptionalFolderPathType,
+    OptionalFilePathType,
 )
 from tye_lab_to_nwb.ast_neuropixels import AStNeuroPixelsNNWBConverter
 from tye_lab_to_nwb.tools import read_session_config
@@ -21,6 +22,7 @@ def session_to_nwb(
     nwbfile_path: FilePathType,
     ecephys_recording_folder_path: FolderPathType,
     phy_sorting_folder_path: OptionalFolderPathType,
+    histology_image_file_path: OptionalFilePathType,
     subject_metadata: Optional[Dict[str, str]] = None,
     stub_test: Optional[bool] = False,
 ):
@@ -72,7 +74,10 @@ def session_to_nwb(
     # Add sorting
     if phy_sorting_folder_path:
         source_data.update(dict(Sorting=dict(folder_path=str(phy_sorting_folder_path))))
-        conversion_options.update(dict(Sorting=dict(stub_test=False)))
+        conversion_options.update(dict(Sorting=dict(stub_test=stub_test)))
+
+    if histology_image_file_path:
+        source_data.update(dict(Image=dict(file_path=str(histology_image_file_path))))
 
     converter = AStNeuroPixelsNNWBConverter(source_data=source_data)
 
@@ -141,8 +146,9 @@ if __name__ == "__main__":
 
     # Run conversion for a single session
     session_to_nwb(
-        nwbfile_path="/Volumes/t7-ssd/Fergil_NWB/nwbfiles/nwb_stub/npx_ap_lf_stub.nwb",
+        nwbfile_path="/Volumes/t7-ssd/Fergil_NWB/nwbfiles/nwb_stub/npx_phy_histo_stub.nwb",
         ecephys_recording_folder_path="/Volumes/t7-ssd/Raw_NPX",
         phy_sorting_folder_path="/Volumes/t7-ssd/Raw_NPX/imec0_ks2",
+        histology_image_file_path="/Volumes/t7-ssd/Raw_NPX/Ast_Histo/NPX3/NPX3_LABELLED_V2_processed.tif",
         stub_test=stub_test,
     )

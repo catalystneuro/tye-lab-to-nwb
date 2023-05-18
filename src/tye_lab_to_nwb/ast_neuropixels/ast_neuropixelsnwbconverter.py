@@ -7,6 +7,7 @@ from neuroconv.datainterfaces import (
     SpikeGLXRecordingInterface,
     PhySortingInterface,
 )
+from tye_lab_to_nwb.ast_neuropixels.ast_neuropixelshistologyinterface import AStNeuropixelsHistologyInterface
 
 
 class AStNeuroPixelsNNWBConverter(NWBConverter):
@@ -16,6 +17,7 @@ class AStNeuroPixelsNNWBConverter(NWBConverter):
         RecordingAP=SpikeGLXRecordingInterface,
         RecordingLF=SpikeGLXRecordingInterface,
         Sorting=PhySortingInterface,
+        Image=AStNeuropixelsHistologyInterface,
     )
 
     def run_conversion(
