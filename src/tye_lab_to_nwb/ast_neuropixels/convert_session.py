@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional, Dict
 from warnings import warn
 
-from nwbinspector import inspect_nwb
+from nwbinspector import inspect_nwbfile
 from nwbinspector.inspector_tools import format_messages, save_report
 
 from neuroconv.utils import (
@@ -105,7 +105,7 @@ def session_to_nwb(
         )
 
         # Run inspection for nwbfile
-        results = list(inspect_nwb(nwbfile_path=nwbfile_path))
+        results = list(inspect_nwbfile(nwbfile_path=nwbfile_path))
         report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
         save_report(
             report_file_path=report_path,
