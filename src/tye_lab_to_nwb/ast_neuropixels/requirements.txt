@@ -1,2 +1,2 @@
 -e git+https://github.com/catalystneuro/neuroconv@main#egg=neuroconv
-neuroconv[spikeglx]
+neuroconv[spikeglx,phy]

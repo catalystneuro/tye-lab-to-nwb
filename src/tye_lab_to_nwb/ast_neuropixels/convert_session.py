@@ -11,6 +11,7 @@ from neuroconv.utils import (
     FolderPathType,
     load_dict_from_file,
     dict_deep_update,
+    OptionalFolderPathType,
 )
 from tye_lab_to_nwb.ast_neuropixels import AStNeuroPixelsNNWBConverter
 from tye_lab_to_nwb.tools import read_session_config
@@ -19,6 +20,7 @@ from tye_lab_to_nwb.tools import read_session_config
 def session_to_nwb(
     nwbfile_path: FilePathType,
     ecephys_recording_folder_path: FolderPathType,
+    phy_sorting_folder_path: OptionalFolderPathType,
     subject_metadata: Optional[Dict[str, str]] = None,
     stub_test: Optional[bool] = False,
 ):
@@ -31,6 +33,8 @@ def session_to_nwb(
         The file path to the NWB file that will be created.
     ecephys_recording_folder_path: FolderPathType
         The path that points to the folder where the Neuropixels files are located.
+    phy_sorting_folder_path: FolderPathType, optional
+        The path that points to the folder where the Phy sorting output files are located.
     subject_metadata: dict, optional
         The optional metadata for the experimental subject.
     stub_test: bool, optional
@@ -64,6 +68,11 @@ def session_to_nwb(
             RecordingLF=dict(stub_test=stub_test),
         )
     )
+
+    # Add sorting
+    if phy_sorting_folder_path:
+        source_data.update(dict(Sorting=dict(folder_path=str(phy_sorting_folder_path))))
+        conversion_options.update(dict(Sorting=dict(stub_test=False)))
 
     converter = AStNeuroPixelsNNWBConverter(source_data=source_data)
 
@@ -134,5 +143,6 @@ if __name__ == "__main__":
     session_to_nwb(
         nwbfile_path="/Volumes/t7-ssd/Fergil_NWB/nwbfiles/nwb_stub/npx_ap_lf_stub.nwb",
         ecephys_recording_folder_path="/Volumes/t7-ssd/Raw_NPX",
+        phy_sorting_folder_path="/Volumes/t7-ssd/Raw_NPX/imec0_ks2",
         stub_test=stub_test,
     )

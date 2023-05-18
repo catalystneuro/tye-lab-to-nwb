@@ -5,6 +5,7 @@ from pynwb import NWBFile
 from neuroconv import NWBConverter
 from neuroconv.datainterfaces import (
     SpikeGLXRecordingInterface,
+    PhySortingInterface,
 )
 
 
@@ -14,6 +15,7 @@ class AStNeuroPixelsNNWBConverter(NWBConverter):
     data_interface_classes = dict(
         RecordingAP=SpikeGLXRecordingInterface,
         RecordingLF=SpikeGLXRecordingInterface,
+        Sorting=PhySortingInterface,
     )
 
     def run_conversion(
