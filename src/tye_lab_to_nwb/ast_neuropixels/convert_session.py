@@ -37,6 +37,8 @@ def session_to_nwb(
         The path that points to the folder where the Neuropixels files are located.
     phy_sorting_folder_path: FolderPathType, optional
         The path that points to the folder where the Phy sorting output files are located.
+    histology_image_file_path: FilePathType, optional
+        The path that points to the TIF image file showing where the probes were inserted.
     subject_metadata: dict, optional
         The optional metadata for the experimental subject.
     stub_test: bool, optional
