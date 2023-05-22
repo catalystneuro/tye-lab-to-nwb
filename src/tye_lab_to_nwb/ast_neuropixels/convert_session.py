@@ -85,9 +85,9 @@ def session_to_nwb(
     metadata = converter.get_metadata()
 
     # Update default metadata with the editable in the corresponding yaml file
-    # editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
-    # editable_metadata = load_dict_from_file(editable_metadata_path)
-    # metadata = dict_deep_update(metadata, editable_metadata)
+    editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
+    editable_metadata = load_dict_from_file(editable_metadata_path)
+    metadata = dict_deep_update(metadata, editable_metadata)
 
     if subject_metadata:
         metadata = dict_deep_update(metadata, dict(Subject=subject_metadata))
@@ -118,6 +118,7 @@ def session_to_nwb(
                 results,
                 levels=["importance", "file_path"],
             ),
+            overwrite=True,
         )
     except Exception as e:
         with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
@@ -129,26 +130,27 @@ if __name__ == "__main__":
     # Parameters for converting a single session
     # The path to the Excel (.xlsx) file that contains the file paths for each data stream.
     # The number of rows in the file corresponds to the number of sessions that can be converted.
-    # excel_file_path = Path("/Volumes/t7-ssd/OpenEphys/session_config.xlsx")
-    # config = read_session_config(excel_file_path=excel_file_path)
+    excel_file_path = Path("/Volumes/t7-ssd/Raw_NPX/session_config.xlsx")
+    config = read_session_config(excel_file_path=excel_file_path)
     # Choose which session will be converted by specifying the index of the row
-    # row_index = 0
+    row_index = 0
 
-    # # Add subject metadata (optional)
-    # subject_metadata = dict()
-    # for subject_field in ["sex", "subject_id", "age", "genotype", "strain"]:
-    #     if config[subject_field][row_index]:
-    #         subject_metadata[subject_field] = str(config[subject_field][row_index])
+    # Add subject metadata (optional)
+    subject_metadata = dict()
+    for subject_field in ["sex", "subject_id", "age", "genotype", "strain"]:
+        if config[subject_field][row_index]:
+            subject_metadata[subject_field] = str(config[subject_field][row_index])
 
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
-    stub_test = True
+    stub_test = False
 
     # Run conversion for a single session
     session_to_nwb(
-        nwbfile_path="/Volumes/t7-ssd/Fergil_NWB/nwbfiles/nwb_stub/npx_phy_histo_stub.nwb",
-        ecephys_recording_folder_path="/Volumes/t7-ssd/Raw_NPX",
-        phy_sorting_folder_path="/Volumes/t7-ssd/Raw_NPX/imec0_ks2",
-        histology_image_file_path="/Volumes/t7-ssd/Raw_NPX/Ast_Histo/NPX3/NPX3_LABELLED_V2_processed.tif",
+        nwbfile_path=config["nwbfile_path"][row_index],
+        ecephys_recording_folder_path=config["ecephys_folder_path"][row_index],
+        phy_sorting_folder_path=config["phy_folder_path"][row_index],
+        histology_image_file_path=config["histology_image_file_path"][row_index],
+        subject_metadata=subject_metadata,
         stub_test=stub_test,
     )
