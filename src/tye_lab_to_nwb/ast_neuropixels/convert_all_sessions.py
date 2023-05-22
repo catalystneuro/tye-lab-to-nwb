@@ -19,7 +19,7 @@ def parallel_convert_sessions(
     excel_file_path : FilePathType
         The path to the Excel (.xlsx) file that contains the parameters for converting the sessions.
         The number of rows in the file corresponds to the number of sessions that will be converted.
-        The folder path to the ecephys recording and the file path to the NWB file are required values for each row.
+        The path to the raw Neuropixels .ap.bin file and the file path to the NWB file are required values for each row.
     num_parallel_jobs: int, optional
         The number of parallel converted sessions. The default is to convert one session at a time.
         When not specified (num_parallel_jobs=None) it is set to use all available CPUs.
@@ -28,7 +28,7 @@ def parallel_convert_sessions(
         Default is to write the whole ecephys recording and plexon data to the file.
     """
 
-    config = read_session_config(excel_file_path=excel_file_path)
+    config = read_session_config(excel_file_path=excel_file_path, required_column_name="neuropixels_file_path")
 
     kwargs_list = []
     for row_ind, row in config.iterrows():
@@ -39,7 +39,7 @@ def parallel_convert_sessions(
         kwargs_list.append(
             dict(
                 nwbfile_path=row["nwbfile_path"],
-                ecephys_recording_folder_path=row["ecephys_folder_path"],
+                neuropixels_file_path=row["neuropixels_file_path"],
                 phy_sorting_folder_path=row["phy_folder_path"],
                 histology_image_file_path=row["histology_image_file_path"],
                 subject_metadata=subject_metadata,

@@ -20,7 +20,7 @@ from tye_lab_to_nwb.tools import read_session_config
 
 def session_to_nwb(
     nwbfile_path: FilePathType,
-    ecephys_recording_folder_path: FolderPathType,
+    neuropixels_file_path: FolderPathType,
     phy_sorting_folder_path: OptionalFolderPathType,
     histology_image_file_path: OptionalFilePathType,
     subject_metadata: Optional[Dict[str, str]] = None,
@@ -33,8 +33,8 @@ def session_to_nwb(
     ----------
     nwbfile_path : FilePathType
         The file path to the NWB file that will be created.
-    ecephys_recording_folder_path: FolderPathType
-        The path that points to the folder where the Neuropixels files are located.
+    neuropixels_file_path: FilePathType
+        The path that points the raw Neuropixels .ap.bin file.
     phy_sorting_folder_path: FolderPathType, optional
         The path that points to the folder where the Phy sorting output files are located.
     histology_image_file_path: FilePathType, optional
@@ -50,15 +50,11 @@ def session_to_nwb(
     conversion_options = dict()
 
     # Add Recording
-    ecephys_recording_folder_path = Path(ecephys_recording_folder_path)
-    spike_glx_ap_bin_file_paths = list(ecephys_recording_folder_path.glob("*.ap.bin"))
-    assert spike_glx_ap_bin_file_paths, f"The '.ap.bin' file is missing from the {ecephys_recording_folder_path}."
-    spike_glx_ap_bin_file_path = spike_glx_ap_bin_file_paths[0]
+    spike_glx_ap_bin_file_path = Path(neuropixels_file_path)
+    assert "ap.bin" in spike_glx_ap_bin_file_path.name, "The 'neuropixels_file_path' should point to an 'ap.bin' file."
 
     spike_glx_lf_bin_file_path = str(spike_glx_ap_bin_file_path).replace("ap", "lf")
-    assert Path(
-        spike_glx_lf_bin_file_path
-    ).is_file(), f"The 'lf.bin' file is missing from {ecephys_recording_folder_path}."
+    assert Path(spike_glx_lf_bin_file_path).is_file(), f"The 'lf.bin' file is missing from {neuropixels_file_path}."
 
     source_data.update(
         dict(
@@ -95,7 +91,7 @@ def session_to_nwb(
         metadata = dict_deep_update(metadata, dict(Subject=subject_metadata))
 
     if "session_id" not in metadata["NWBFile"]:
-        ecephys_folder_name = ecephys_recording_folder_path.name
+        ecephys_folder_name = spike_glx_ap_bin_file_path.parent.name
         session_id = ecephys_folder_name.replace(" ", "").replace("_", "-")
         metadata["NWBFile"].update(session_id=session_id)
 
@@ -133,7 +129,7 @@ if __name__ == "__main__":
     # The path to the Excel (.xlsx) file that contains the file paths for each data stream.
     # The number of rows in the file corresponds to the number of sessions that can be converted.
     excel_file_path = Path("/Volumes/t7-ssd/Raw_NPX/session_config.xlsx")
-    config = read_session_config(excel_file_path=excel_file_path)
+    config = read_session_config(excel_file_path=excel_file_path, required_column_name="neuropixels_file_path")
     # Choose which session will be converted by specifying the index of the row
     row_index = 0
 
@@ -150,7 +146,7 @@ if __name__ == "__main__":
     # Run conversion for a single session
     session_to_nwb(
         nwbfile_path=config["nwbfile_path"][row_index],
-        ecephys_recording_folder_path=config["ecephys_folder_path"][row_index],
+        neuropixels_file_path=config["neuropixels_file_path"][row_index],
         phy_sorting_folder_path=config["phy_folder_path"][row_index],
         histology_image_file_path=config["histology_image_file_path"][row_index],
         subject_metadata=subject_metadata,
