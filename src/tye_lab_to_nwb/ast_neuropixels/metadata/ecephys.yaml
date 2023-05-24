@@ -1,0 +1,58 @@
+Ecephys:
+  UnitProperties:
+    - name: spike_amplitudes
+      description: Peak amplitude of each spike for each unit.
+    - name: contamination
+      description: The estimate of the contamination of the unit.
+    - name: label
+      description: The classification label for each unit (e.g. "mua", "good").
+    - name: pt_ratio
+      description: The ratio between peak and trough for each unit.
+    - name: amplitude_cutoff
+      description: The fraction of spikes below the spike detection threshold.
+    - name: peak_channel
+      description: The channel which has the largest amplitude for each unit.
+    - name: contamination_rate
+      description: The rate of contamination for each unit.
+    - name: cumulative_drift
+      description: The drift is estimated as the sum of the absolute value of the drift of the unit over time.
+    - name: d_prime
+      description: A measure of cluster separation based on Linear Discriminant Analysis.
+    - name: duration
+      description: The time between waveform peak and trough in milliseconds.
+    - name: epoch_name
+      description: The name of the epoch.
+    - name: firing_rate
+      description: The average firing rate of each unit in Hz.
+    - name: quality
+      description: The quality metric for each unit. (e.g. good, noise)
+    - name: halfwidth
+      description: The spike width at half max amplitude.
+    - name: isi_violation
+      description: The rate of Inter-Spike Interval (ISI) violation for each unit.
+    - name: isi_violation_count
+      description: The total Inter-Spike Interval (ISI) violations for each unit.
+    - name: isolation_distance
+      description: A metric based on the principal components (PCs) of a unit's waveforms, estimates the distance to nearest cluster.
+    - name: l_ratio
+      description: A metric similar to isolation_distance, estimates the amount of empty space between a cluster.
+    - name: maximum_drift
+      description: The peak-to-peak of the drift signal for each unit.
+    - name: spike_count
+      description: Total number of spikes for each unit.
+    - name: nn_hit_rate
+      description: |
+        A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of their nearest neighbors that fall within the same cluster.
+    - name: nn_miss_rate
+      description: |
+        A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of neighbors outside target cluster that are in the target cluster.
+    - name: presence_ratio
+      description: The fraction of time where spikes are present.
+    - name: recovery_slope
+      description: A waveform metric for each unit measuring the slope of the regression line fit for the recovery period.
+    - name: repolarization_slope
+      description: A waveform metric for each unit measuring the slope of the regression line fit for the repolarization period.
+    - name: silhouette_score
+      description: The ratio between the cohesiveness of a cluster and its separation from other clusters.
+    - name: snr
+      description: The signal-to-noise ratio for a unit.
