@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import Optional
 
+import numpy as np
 from pynwb import NWBFile
 
 from neuroconv import NWBConverter
@@ -7,6 +9,7 @@ from neuroconv.datainterfaces import (
     SpikeGLXRecordingInterface,
     PhySortingInterface,
 )
+from neuroconv.utils import DeepDict, load_dict_from_file, dict_deep_update
 from tye_lab_to_nwb.ast_neuropixels.ast_neuropixelshistologyinterface import AStNeuropixelsHistologyInterface
 
 
@@ -19,6 +22,14 @@ class AStNeuroPixelsNNWBConverter(NWBConverter):
         Sorting=PhySortingInterface,
         Image=AStNeuropixelsHistologyInterface,
     )
+
+    def get_metadata(self) -> DeepDict:
+        metadata = super().get_metadata()
+        # Update unit property names and add descriptions from the yaml file.
+        ecephys_metadata_path = Path(__file__).parent / "metadata" / "ecephys.yaml"
+        ecephys_metadata = load_dict_from_file(ecephys_metadata_path)
+        metadata = dict_deep_update(metadata, ecephys_metadata)
+        return metadata
 
     def run_conversion(
         self,
@@ -38,6 +49,40 @@ class AStNeuroPixelsNNWBConverter(NWBConverter):
                 key="brain_area",
                 values=["ASt"] * num_channels,
             )
+
+        sorting_interface = self.data_interface_objects["Sorting"]
+        sorting_extractor = sorting_interface.sorting_extractor
+        # Rename unit properties to have descriptive names
+        unit_properties_mapping = dict(
+            amplitude="spike_amplitudes",
+            ContamPct="contamination",
+            contam_rate="contamination_rate",
+            KSLabel="label",
+            PT_ratio="pt_ratio",
+            quality="unit_quality",
+            halfwidth="halfwidth_amplitude",
+            isi_viol="isi_violation",
+            num_viol="isi_violation_count",
+            max_drift="maximum_drift",
+            n_spikes="spike_count",
+        )
+        unit_properties = {
+            unit_properties_mapping.get(key, key): value for key, value in sorting_extractor._properties.items()
+        }
+
+        # "fr" and "firing_rate" is duplicated
+        unit_properties.pop("fr")
+        # "ch" and "peak_channel" is duplicated
+        unit_properties.pop("ch")
+        # "epoch_name" and "epoch_name_quality_metrics" and "epoch_name_waveform_metrics" are duplicated
+        unit_properties.pop("epoch_name_quality_metrics")
+        unit_properties.pop("epoch_name_waveform_metrics")
+
+        sorting_extractor._properties = unit_properties
+
+        remove_unit_ids = np.where(unit_properties["unit_quality"] == "noise")
+        sorting_interface.sorting_extractor = sorting_extractor.remove_units(remove_unit_ids)
+
         super().run_conversion(
             nwbfile_path=nwbfile_path,
             nwbfile=nwbfile,

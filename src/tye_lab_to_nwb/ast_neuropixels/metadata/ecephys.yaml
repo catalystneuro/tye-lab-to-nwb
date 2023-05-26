@@ -24,9 +24,9 @@ Ecephys:
       description: The name of the epoch.
     - name: firing_rate
       description: The average firing rate of each unit in Hz.
-    - name: quality
+    - name: unit_quality
       description: The quality metric for each unit. (e.g. good, noise)
-    - name: halfwidth
+    - name: halfwidth_amplitude
       description: The spike width at half max amplitude.
     - name: isi_violation
       description: The rate of Inter-Spike Interval (ISI) violation for each unit.
@@ -41,11 +41,9 @@ Ecephys:
     - name: spike_count
       description: Total number of spikes for each unit.
     - name: nn_hit_rate
-      description: |
-        A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of their nearest neighbors that fall within the same cluster.
+      description: A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of their nearest neighbors that fall within the same cluster.
     - name: nn_miss_rate
-      description: |
-        A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of neighbors outside target cluster that are in the target cluster.
+      description: A nearest neighbor (nn) metric for unit quality that looks at principal components (PCs) and calculates the fraction of neighbors outside target cluster that are in the target cluster.
     - name: presence_ratio
       description: The fraction of time where spikes are present.
     - name: recovery_slope
