@@ -71,7 +71,9 @@ def session_to_nwb(
 
     # Add Recording
     if ecephys_recording_folder_path:
-        source_data.update(dict(Recording=dict(folder_path=str(ecephys_recording_folder_path), stream_name="Signals CH")))
+        source_data.update(
+            dict(Recording=dict(folder_path=str(ecephys_recording_folder_path), stream_name="Signals CH"))
+        )
         conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
 
     # Add Sorting (optional)
