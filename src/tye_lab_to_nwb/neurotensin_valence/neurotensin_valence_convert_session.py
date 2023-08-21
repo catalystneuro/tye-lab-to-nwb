@@ -249,14 +249,14 @@ if __name__ == "__main__":
     confocal_images_composite_tif_file_path = "Hao_NWB/histo/H28_MAX_Composite.tif"
 
     # The file path where the NWB file will be created.
-    nwbfile_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles/test.nwb")
+    nwbfile_path = Path("Hao_NWB/nwbfiles/test.nwb")
 
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
     stub_test = False
 
     # subject metadata (optional)
-    subject_metadata = dict(sex="M", subject_id="H28")
+    subject_metadata = dict(sex="M")
 
     session_to_nwb(
         nwbfile_path=nwbfile_path,
