@@ -192,7 +192,6 @@ def session_to_nwb(
                 results,
                 levels=["importance", "file_path"],
             ),
-            overwrite=True,
         )
     except Exception as e:
         with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
