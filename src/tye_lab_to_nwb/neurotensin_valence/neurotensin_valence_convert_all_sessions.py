@@ -91,5 +91,5 @@ if __name__ == "__main__":
 
     parallel_convert_sessions(
         excel_file_path=excel_file_path,
-        num_parallel_jobs=1,  # defines the number of sessions that will be converted in parallel.
+        num_parallel_jobs=3,  # defines the number of sessions that will be converted in parallel.
     )
