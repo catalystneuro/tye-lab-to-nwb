@@ -48,7 +48,7 @@ def parallel_convert_sessions(
 
     max_workers = calculate_number_of_cpu(requested_cpu=num_parallel_jobs)
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        with tqdm(total=len(config["ecephys_folder_path"]), position=0, leave=False) as progress_bar:
+        with tqdm(total=len(config), position=0, leave=False) as progress_bar:
             futures = []
 
             for row_ind, row in config.iterrows():
@@ -63,13 +63,15 @@ def parallel_convert_sessions(
                     executor.submit(
                         session_to_nwb,
                         nwbfile_path=row["nwbfile_path"],
-                        ecephys_recording_folder_path=row["ecephys_folder_path"],
                         # optional parameters
+                        ecephys_recording_folder_path=row["ecephys_folder_path"],
                         subject_metadata=subject_metadata,
                         plexon_file_path=row["plexon_file_path"],
                         events_file_path=row["events_mat_file_path"],
                         pose_estimation_file_path=row["pose_estimation_csv_file_path"],
                         pose_estimation_config_file_path=row["pose_estimation_pickle_file_path"],
+                        pose_estimation_sampling_rate=row["pose_estimation_sampling_rate"],
+                        session_start_time=row["session_start_time"],
                         original_video_file_path=row["behavior_movie_file_path"],
                         labeled_video_file_path=row["behavior_labeled_movie_file_path"],
                         confocal_images_oif_file_path=row["confocal_images_oif_file_path"],
@@ -89,5 +91,5 @@ if __name__ == "__main__":
 
     parallel_convert_sessions(
         excel_file_path=excel_file_path,
-        num_parallel_jobs=3,  # defines the number of sessions that will be converted in parallel.
+        num_parallel_jobs=1,  # defines the number of sessions that will be converted in parallel.
     )
