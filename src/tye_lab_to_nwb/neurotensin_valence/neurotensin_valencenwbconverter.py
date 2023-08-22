@@ -32,18 +32,12 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         return metadata_schema
 
     def get_metadata(self):
-        """Auto-fill as much of the metadata as possible. Must comply with metadata schema."""
         metadata = super().get_metadata()
-        start_times = []
-        for interface in self.data_interface_objects.values():
-            interface_metadata = interface.get_metadata()
-            if "NWBFile" not in interface_metadata:
-                continue
-            if "session_start_time" in interface_metadata["NWBFile"]:
-                start_times.append(interface_metadata["NWBFile"]["session_start_time"])
-
-        # Use the earliest session_start_time
-        metadata["NWBFile"].update(session_start_time=min(start_times))
+        # Explicitly use the recording interface session_start_time
+        if "Recording" in self.data_interface_objects:
+            recording_interface = self.data_interface_objects["Recording"]
+            interface_metadata = recording_interface.get_metadata()
+            metadata["NWBFile"].update(session_start_time=interface_metadata["NWBFile"]["session_start_time"])
 
         return metadata
 
@@ -55,9 +49,10 @@ class NeurotensinValenceNWBConverter(NWBConverter):
         overwrite: bool = False,
         conversion_options: Optional[dict] = None,
     ):
-        recording_interface = self.data_interface_objects["Recording"]
-        # manually override t_start
-        recording_interface.recording_extractor._recording_segments[0].t_start = None
+        if "Recording" in self.data_interface_objects:
+            recording_interface = self.data_interface_objects["Recording"]
+            # manually override t_start
+            recording_interface.recording_extractor._recording_segments[0].t_start = None
         super().run_conversion(
             nwbfile_path=nwbfile_path,
             nwbfile=nwbfile,
