@@ -5,10 +5,8 @@ import numpy as np
 import pandas as pd
 from neuroconv.datainterfaces.ophys.baseimagingextractorinterface import BaseImagingExtractorInterface
 from neuroconv.tools.roiextractors import get_nwb_imaging_metadata
-from neuroconv.utils import FilePathType, dict_deep_update
+from neuroconv.utils import ArrayType, FilePathType, dict_deep_update
 from pynwb import NWBFile
-
-from neuroconv.utils import ArrayType
 
 from tye_lab_to_nwb.ast_ophys.extractors.motion_corrected_miniscope_imagingextractor import (
     MotionCorrectedMiniscopeImagingExtractor,

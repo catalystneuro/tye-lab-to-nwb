@@ -5,12 +5,8 @@ import numpy as np
 from neuroconv.datainterfaces.ophys.baseimagingextractorinterface import BaseImagingExtractorInterface
 from pynwb import NWBFile
 from roiextractors.extractors.miniscopeimagingextractor.miniscopeimagingextractor import _MiniscopeImagingExtractor
-
-from neuroconv.utils import FilePathType
-
+from neuroconv.utils import FilePathType, dict_deep_update
 from neuroconv.tools.roiextractors import get_nwb_imaging_metadata
-
-from neuroconv.utils import dict_deep_update
 
 from tye_lab_to_nwb.ast_ophys.tools import load_timestamps_from_mat, add_processed_one_photon_series
 
