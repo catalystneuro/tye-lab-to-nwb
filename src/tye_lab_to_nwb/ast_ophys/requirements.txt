@@ -1,0 +1,2 @@
+pymatreader>=0.0.32
+neuroconv[miniscope]
