@@ -27,6 +27,8 @@ def session_to_nwb(
         The file path to the NWB file that will be created.
     miniscope_folder_path: FolderPathType, optional
         The path that points to the folder where the raw Miniscope data is located.
+    processed_miniscope_avi_file_path: FilePathType, optional
+        The path that points to the concatenated and first frames deleted "ffd" Miniscope video (.avi).
     motion_corrected_mat_file_path: FilePathType, optional
         The path to the .mat file that contains the motion corrected imaging data.
     timestamps_mat_file_path: FilePathType, optional
@@ -34,9 +36,11 @@ def session_to_nwb(
     reward_trials_indices: List, optional
         The list that denotes which trial indices are reward trials.
         e.g. [1, 3, 6, 9, 10, 12, 13, 15, 16, 20, 23, 24, 27, 28, 30]
+    segmentation_mat_file_path: FilePathType, optional
+        The path that points to the MATLAB file containing the "neuron" struct has been saved to the file.
     stub_test: bool, optional
-        For testing purposes, when stub_test=True only writes a subset of ecephys and plexon data.
-        Default is to write the whole ecephys recording and plexon data to the file.
+        Write the first 100 frames to the NWB file for testing purposes.
+        Default is to write the whole imaging and segmentation data to the file.
     """
 
     source_data = dict()
@@ -100,16 +104,43 @@ def session_to_nwb(
 
 if __name__ == "__main__":
     # Parameters for converting a single session
-    stub_test = True
+
+    # The file path where the NWB file will be created.
+    nwbfile_path = "/Users/weian/catalystneuro/demo_notebooks/C6-J588-Disc5.nwb"
+
+    # The folder path where the *raw* Miniscope data is located. (optional)
+    # Check the `ast_ophys_notes.md` file to see the expected folder structure.
+    miniscope_folder_path = "/Volumes/t7-ssd/Miniscope/C6-J588_Disc5"
+
+    # The file path that points to the concatenated and first frames deleted "ffd" Miniscope video (.avi). (optional)
+    processed_miniscope_avi_file_path = "/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamAll_ffd.avi"
+
+    # The file path that points to the motion corrected Miniscope video (.mat). (optional)
+    motion_corrected_mat_file_path = "/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamComb_MC.mat"
+
+    # The file path that points to the MATLAB file that contains the Miniscope and trial timings.
+    # Required for the processed and motion corrected Miniscope data.
+    timestamps_mat_file_path = "/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_timestampsAllCumulData.mat"
+
+    # The list of trials that correspond to the CS-Reward trials. (optional)
+    reward_trials_indices = [1, 3, 6, 9, 10, 12, 13, 15, 16, 20, 23, 24, 27, 28, 30]
+
+    # The file path that points to the MATLAB file containing the "neuron" struct has been saved to the file.
+    # Check the `ast_ophys_notes.md` file to see how to save the "neuron" struct to a MATLAB file.
+    segmentation_mat_file_path = "/Volumes/t7-ssd/Miniscope/neuron.mat"
+
+    # For faster conversion, stub_test=True will only write the first 100 frames of the imaging data.
+    # When running a full conversion, use stub_test=False.
+    stub_test = False
 
     # Run conversion for a single session
     session_to_nwb(
-        nwbfile_path="/Users/weian/catalystneuro/demo_notebooks/C6-J588-Disc5.nwb",
-        miniscope_folder_path="/Volumes/t7-ssd/Miniscope/C6-J588_Disc5",
-        processed_miniscope_avi_file_path="/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamAll_ffd.avi",
-        motion_corrected_mat_file_path="/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamComb_MC.mat",
-        timestamps_mat_file_path="/Volumes/t7-ssd/Miniscope/C6-J588_Disc5_timestampsAllCumulData.mat",
-        reward_trials_indices=[1, 3, 6, 9, 10, 12, 13, 15, 16, 20, 23, 24, 27, 28, 30],
-        segmentation_mat_file_path="/Volumes/t7-ssd/Miniscope/neuron.mat",
+        nwbfile_path=nwbfile_path,
+        miniscope_folder_path=miniscope_folder_path,
+        processed_miniscope_avi_file_path=processed_miniscope_avi_file_path,
+        motion_corrected_mat_file_path=motion_corrected_mat_file_path,
+        timestamps_mat_file_path=timestamps_mat_file_path,
+        reward_trials_indices=reward_trials_indices,
+        segmentation_mat_file_path=segmentation_mat_file_path,
         stub_test=stub_test,
     )
