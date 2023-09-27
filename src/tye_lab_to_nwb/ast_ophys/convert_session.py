@@ -4,6 +4,8 @@ from typing import Optional, List
 from neuroconv.utils import (
     FilePathType,
     FolderPathType,
+    load_dict_from_file,
+    dict_deep_update,
 )
 from tye_lab_to_nwb.ast_ophys.ast_ophysnwbconverter import AStOphysNWBConverter
 
@@ -16,6 +18,7 @@ def session_to_nwb(
     timestamps_mat_file_path: Optional[FilePathType] = None,
     reward_trials_indices: Optional[List[int]] = None,
     segmentation_mat_file_path: Optional[FilePathType] = None,
+    subject_metadata: Optional[dict] = None,
     stub_test: Optional[bool] = False,
 ):
     """
@@ -90,9 +93,22 @@ def session_to_nwb(
     metadata = converter.get_metadata()
 
     # Update default metadata with the editable in the corresponding yaml file
-    # editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
-    # editable_metadata = load_dict_from_file(editable_metadata_path)
-    # metadata = dict_deep_update(metadata, editable_metadata)
+    editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
+    editable_metadata = load_dict_from_file(editable_metadata_path)
+    metadata = dict_deep_update(metadata, editable_metadata)
+
+    subject_id = None
+    if "session_id" not in metadata["NWBFile"] and processed_miniscope_avi_file_path is not None:
+        file_name = Path(processed_miniscope_avi_file_path).stem
+        subject_id, disc_id = file_name.split("_", maxsplit=2)[:2]
+        session_id = f"{subject_id}-{disc_id}"
+        metadata["NWBFile"].update(session_id=session_id)
+
+    if subject_metadata:
+        metadata = dict_deep_update(metadata, dict(Subject=subject_metadata))
+
+    if "Subject" in metadata and "subject_id" not in metadata["Subject"] and subject_id is not None:
+        metadata["Subject"].update(subject_id=subject_id)
 
     converter.run_conversion(
         nwbfile_path=str(nwbfile_path),
@@ -133,6 +149,9 @@ if __name__ == "__main__":
     # When running a full conversion, use stub_test=False.
     stub_test = False
 
+    # subject metadata like sex (optional)
+    subject_metadata = dict(sex="M")
+
     # Run conversion for a single session
     session_to_nwb(
         nwbfile_path=nwbfile_path,
@@ -142,5 +161,6 @@ if __name__ == "__main__":
         timestamps_mat_file_path=timestamps_mat_file_path,
         reward_trials_indices=reward_trials_indices,
         segmentation_mat_file_path=segmentation_mat_file_path,
+        subject_metadata=subject_metadata,
         stub_test=stub_test,
     )
