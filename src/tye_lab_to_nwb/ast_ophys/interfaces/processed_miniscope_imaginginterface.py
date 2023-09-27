@@ -59,7 +59,8 @@ class ProcessedMiniscopeImagingInterface(BaseImagingExtractorInterface):
             name="OnePhotonSeriesProcessed",
             imaging_plane=imaging_plane_name,
             description="The processed imaging data from one-photon excitation microscopy."
-            "The first three frame for each trial was deleted from the original video snippets.",
+            "The first frames for each trial was deleted from the original video snippets, and the images were downsampled by a factor of two.",
+            binning=4,
         )
         return metadata
 

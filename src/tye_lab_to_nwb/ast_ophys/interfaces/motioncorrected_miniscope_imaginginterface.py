@@ -62,6 +62,7 @@ class MotionCorrectedMiniscopeImagingInterface(BaseImagingExtractorInterface):
             name="OnePhotonSeriesMotionCorrected",
             imaging_plane=imaging_plane_name,
             description="The motion corrected imaging data from one-photon excitation microscopy.",
+            binning=4,
         )
 
         return metadata
