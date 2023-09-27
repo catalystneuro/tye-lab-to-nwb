@@ -3,6 +3,9 @@ from pathlib import Path
 from typing import Optional, Dict
 from warnings import warn
 
+from importlib.metadata import version
+from packaging.version import Version
+
 from nwbinspector import inspect_nwb
 from nwbinspector.inspector_tools import format_messages, save_report
 
@@ -59,7 +62,11 @@ def session_to_nwb(
     conversion_options = dict()
 
     # Add Recording
-    source_data.update(dict(Recording=dict(folder_path=str(ecephys_recording_folder_path), stream_name="Signals CH")))
+    recording_source_data = dict(folder_path=str(ecephys_recording_folder_path), stream_name="Signals CH")
+    if Version(version("neo")) > Version("0.12.0"):
+        recording_source_data.update(ignore_timestamps_errors=True)
+
+    source_data.update(dict(Recording=recording_source_data))
     conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
 
     # Add Sorting (optional)
@@ -183,7 +190,7 @@ if __name__ == "__main__":
 
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
-    stub_test = False
+    stub_test = True
 
     # Run conversion for a single session
     session_to_nwb(
