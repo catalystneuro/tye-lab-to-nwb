@@ -10,8 +10,6 @@ Ecephys:
       description: The ratio between peak and trough for each unit.
     - name: amplitude_cutoff
       description: The fraction of spikes below the spike detection threshold.
-    - name: peak_channel
-      description: The channel which has the largest amplitude for each unit.
     - name: contamination_rate
       description: The rate of contamination for each unit.
     - name: cumulative_drift
@@ -54,3 +52,11 @@ Ecephys:
       description: The ratio between the cohesiveness of a cluster and its separation from other clusters.
     - name: snr
       description: The signal-to-noise ratio for a unit.
+    - name: probe_depth
+      description: The probe depth measured in micrometers, starting with 0 at the tip of probe.
+    - name: spread_of_unit_in_probe_depth
+      description: The spread of the unit in depth measured in micrometers.
+    - name: velocity_above
+      description: The measure of the slope of the waveform (up) or the onset to the peak amplitude.
+    - name: velocity_below
+      description: The measure of the slope of the waveform (down) or the onset to the peak amplitude.

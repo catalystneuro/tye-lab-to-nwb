@@ -65,18 +65,24 @@ class AStNeuroPixelsNNWBConverter(NWBConverter):
             num_viol="isi_violation_count",
             max_drift="maximum_drift",
             n_spikes="spike_count",
+            depth="probe_depth",
+            spread="spread_of_unit_in_probe_depth",
         )
         unit_properties = {
             unit_properties_mapping.get(key, key): value for key, value in sorting_extractor._properties.items()
         }
 
         # "fr" and "firing_rate" is duplicated
-        unit_properties.pop("fr")
-        # "ch" and "peak_channel" is duplicated
-        unit_properties.pop("ch")
+        unit_properties.pop("fr", None)
+        # "ch" and "peak_channel" is duplicated, they mean neuropixel channel (not a unit property)
+        unit_properties.pop("ch", None)
+        unit_properties.pop("peak_channel", None)
+
+        unit_properties.pop("sh", None)
+
         # "epoch_name" and "epoch_name_quality_metrics" and "epoch_name_waveform_metrics" are duplicated
-        unit_properties.pop("epoch_name_quality_metrics")
-        unit_properties.pop("epoch_name_waveform_metrics")
+        unit_properties.pop("epoch_name_quality_metrics", None)
+        unit_properties.pop("epoch_name_waveform_metrics", None)
 
         sorting_extractor._properties = unit_properties
 
