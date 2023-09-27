@@ -10,6 +10,8 @@ from pynwb import NWBFile
 from pynwb.ophys import OnePhotonSeries
 from roiextractors import ImagingExtractor
 
+from neuroconv.utils import calculate_regular_series_rate
+
 
 def add_processed_one_photon_series(
     nwbfile: NWBFile,
@@ -27,10 +29,15 @@ def add_processed_one_photon_series(
         imaging_plane=imaging_plane,
         # H5DataIO wrap should be eventually removed
         data=H5DataIO(data=ImagingExtractorDataChunkIterator(imaging_extractor=imaging), compression=True),
-        timestamps=H5DataIO(data=timestamps, compression=True),
         dimension=imaging.get_image_size()[::-1],
         unit="n.a.",
     )
+
+    rate = calculate_regular_series_rate(timestamps)
+    if rate is not None:
+        photon_series_kwargs.update(rate=rate, starting_time=timestamps[0])
+    else:
+        photon_series_kwargs.update(timestamps=H5DataIO(data=timestamps, compression=True))
 
     one_photon_series = OnePhotonSeries(**photon_series_kwargs)
     ophys = get_module(nwbfile=nwbfile, name="ophys", description="contains optical physiology processed data")
