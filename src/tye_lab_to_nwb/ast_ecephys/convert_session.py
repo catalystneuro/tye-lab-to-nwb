@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
     # For faster conversion, stub_test=True would only write a subset of ecephys and plexon data.
     # When running a full conversion, use stub_test=False.
-    stub_test = True
+    stub_test = False
 
     # Run conversion for a single session
     session_to_nwb(
