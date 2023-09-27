@@ -1,12 +1,18 @@
+import traceback
 from pathlib import Path
 from typing import Optional, List
+from warnings import warn
 
+from dateutil import tz
 from neuroconv.utils import (
     FilePathType,
     FolderPathType,
     load_dict_from_file,
     dict_deep_update,
 )
+from nwbinspector import inspect_nwbfile
+from nwbinspector.inspector_tools import save_report, format_messages
+
 from tye_lab_to_nwb.ast_ophys.ast_ophysnwbconverter import AStOphysNWBConverter
 
 
@@ -110,12 +116,34 @@ def session_to_nwb(
     if "Subject" in metadata and "subject_id" not in metadata["Subject"] and subject_id is not None:
         metadata["Subject"].update(subject_id=subject_id)
 
-    converter.run_conversion(
-        nwbfile_path=str(nwbfile_path),
-        metadata=metadata,
-        conversion_options=conversion_options,
-        overwrite=True,
-    )
+    # For data provenance we can add the time zone information to the conversion if missing
+    session_start_time = metadata["NWBFile"]["session_start_time"]
+    # Get the timezone object for US/Pacific (San Diego, California)
+    pacific_timezone = tz.gettz("US/Pacific")
+    metadata["NWBFile"].update(session_start_time=session_start_time.replace(tzinfo=pacific_timezone))
+
+    try:
+        # Run conversion
+        converter.run_conversion(
+            nwbfile_path=str(nwbfile_path), metadata=metadata, conversion_options=conversion_options
+        )
+
+        # Run inspection for nwbfile
+        nwbfile_path = Path(nwbfile_path)
+        results = list(inspect_nwbfile(nwbfile_path=nwbfile_path))
+        report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
+        save_report(
+            report_file_path=report_path,
+            formatted_messages=format_messages(
+                results,
+                levels=["importance", "file_path"],
+            ),
+            overwrite=True,
+        )
+    except Exception as e:
+        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+            f.write(traceback.format_exc())
+        warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
 
 if __name__ == "__main__":
