@@ -75,6 +75,7 @@ class ProcessedMiniscopeImagingInterface(BaseImagingExtractorInterface):
         metadata: Optional[dict] = None,
         stub_test: bool = False,
         stub_frames: int = 100,
+        photon_series_index: int = 0,
     ):
         imaging_extractor = self.imaging_extractor
         timestamps = self.get_original_timestamps()
@@ -86,7 +87,7 @@ class ProcessedMiniscopeImagingInterface(BaseImagingExtractorInterface):
         add_processed_one_photon_series(
             nwbfile=nwbfile,
             metadata=metadata,
-            photon_series_index=2,
+            photon_series_index=photon_series_index,
             imaging=imaging_extractor,
             timestamps=timestamps,
         )

@@ -111,6 +111,7 @@ class MotionCorrectedMiniscopeImagingInterface(BaseImagingExtractorInterface):
         metadata: Optional[dict] = None,
         stub_test: bool = False,
         stub_frames: int = 100,
+        photon_series_index: int = 0,
         reward_trials_indices: Optional[ArrayType] = None,
     ):
         imaging_extractor = self.imaging_extractor
@@ -123,5 +124,9 @@ class MotionCorrectedMiniscopeImagingInterface(BaseImagingExtractorInterface):
         self.add_trials(nwbfile=nwbfile, reward_trials_indices=reward_trials_indices)
 
         add_processed_one_photon_series(
-            nwbfile=nwbfile, metadata=metadata, imaging=imaging_extractor, timestamps=timestamps
+            nwbfile=nwbfile,
+            metadata=metadata,
+            imaging=imaging_extractor,
+            timestamps=timestamps,
+            photon_series_index=photon_series_index,
         )

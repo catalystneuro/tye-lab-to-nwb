@@ -4,6 +4,7 @@ from typing import Optional, List
 from warnings import warn
 
 from dateutil import tz
+from dateutil.parser import parse
 from neuroconv.utils import (
     FilePathType,
     FolderPathType,
@@ -25,6 +26,7 @@ def session_to_nwb(
     reward_trials_indices: Optional[List[int]] = None,
     segmentation_mat_file_path: Optional[FilePathType] = None,
     subject_metadata: Optional[dict] = None,
+    session_start_time: Optional[str] = None,
     stub_test: Optional[bool] = False,
 ):
     """
@@ -47,6 +49,9 @@ def session_to_nwb(
         e.g. [1, 3, 6, 9, 10, 12, 13, 15, 16, 20, 23, 24, 27, 28, 30]
     segmentation_mat_file_path: FilePathType, optional
         The path that points to the MATLAB file containing the "neuron" struct has been saved to the file.
+    session_start_time: str, optional
+        For sessions where the raw Miniscope data is not available the recording start time must be provided.
+        The session_start_time should be in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00).
     stub_test: bool, optional
         Write the first 100 frames to the NWB file for testing purposes.
         Default is to write the whole imaging and segmentation data to the file.
@@ -71,7 +76,10 @@ def session_to_nwb(
                 )
             )
         )
-        conversion_options.update(dict(ProcessedImaging=dict(stub_test=stub_test)))
+        processed_imaging_conversion_options = dict(
+            stub_test=stub_test, photon_series_index=1 if miniscope_folder_path else 0
+        )
+        conversion_options.update(dict(ProcessedImaging=processed_imaging_conversion_options))
 
     # Add motion corrected imaging
     if motion_corrected_mat_file_path:
@@ -83,10 +91,12 @@ def session_to_nwb(
                 )
             )
         )
-        reward_trials_indices = None or reward_trials_indices
-        conversion_options.update(
-            dict(MotionCorrectedImaging=dict(stub_test=stub_test, reward_trials_indices=reward_trials_indices))
+        motion_corrected_conversion_options = dict(
+            stub_test=stub_test, photon_series_index=2 if miniscope_folder_path else 1
         )
+        if reward_trials_indices:
+            motion_corrected_conversion_options.update(reward_trials_indices=reward_trials_indices)
+        conversion_options.update(dict(MotionCorrectedImaging=motion_corrected_conversion_options))
 
     # Add Segmentation
     if segmentation_mat_file_path:
@@ -102,6 +112,15 @@ def session_to_nwb(
     editable_metadata_path = Path(__file__).parent / "metadata" / "general_metadata.yaml"
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
+
+    if miniscope_folder_path is None:
+        if session_start_time is None:
+            raise ValueError(
+                "When the raw Miniscope data is not available the recording start time must be provided manually."
+                "Use the session_start_time keyword argument to provide it in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00)."
+            )
+        session_start_time_dt = parse(session_start_time)
+        metadata["NWBFile"].update(session_start_time=session_start_time_dt)
 
     subject_id = None
     if "session_id" not in metadata["NWBFile"] and processed_miniscope_avi_file_path is not None:
@@ -120,8 +139,10 @@ def session_to_nwb(
     session_start_time = metadata["NWBFile"]["session_start_time"]
     # Get the timezone object for US/Pacific (San Diego, California)
     pacific_timezone = tz.gettz("US/Pacific")
-    metadata["NWBFile"].update(session_start_time=session_start_time.replace(tzinfo=pacific_timezone))
+    session_start_time = session_start_time.replace(tzinfo=pacific_timezone)
+    metadata["NWBFile"].update(session_start_time=session_start_time)
 
+    nwbfile_path = Path(nwbfile_path)
     try:
         # Run conversion
         converter.run_conversion(
@@ -129,7 +150,6 @@ def session_to_nwb(
         )
 
         # Run inspection for nwbfile
-        nwbfile_path = Path(nwbfile_path)
         results = list(inspect_nwbfile(nwbfile_path=nwbfile_path))
         report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
         save_report(
@@ -141,7 +161,7 @@ def session_to_nwb(
             overwrite=True,
         )
     except Exception as e:
-        with open(f"{Path(nwbfile_path).parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
             f.write(traceback.format_exc())
         warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
