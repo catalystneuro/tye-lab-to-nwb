@@ -1,6 +1,8 @@
+import numpy as np
 from pymatreader import read_mat
 from roiextractors import SegmentationExtractor
 from roiextractors.extraction_tools import PathType
+from scipy.sparse import csc_matrix
 
 
 class CnmfeMatlabSegmentationExtractor(SegmentationExtractor):
@@ -27,6 +29,7 @@ class CnmfeMatlabSegmentationExtractor(SegmentationExtractor):
         self._image_size = (self._dataset_file["options"]["d1"], self._dataset_file["options"]["d2"])
         self._num_frames = self._dataset_file["P"]["numFrames"]
         self._roi_response_raw = self._dataset_file["C"].T
+        self._roi_response_deconvolved = self._transform_deconvolved_traces()
         self._image_correlation = self._dataset_file["Cn"]
         self._image_masks = self._transform_image_masks()
 
@@ -44,6 +47,16 @@ class CnmfeMatlabSegmentationExtractor(SegmentationExtractor):
 
     def get_rejected_list(self):
         return []
+
+    def _transform_deconvolved_traces(self):
+        deconvolved_traces = self._dataset_file["S"]
+
+        if isinstance(deconvolved_traces, csc_matrix):
+            deconvolved_traces = deconvolved_traces.toarray()
+        if not np.any(deconvolved_traces):
+            return None
+
+        return deconvolved_traces.T
 
     def _transform_image_masks(self):
         image_masks = self._dataset_file["A"].toarray()

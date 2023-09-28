@@ -141,7 +141,7 @@ def session_to_nwb(
             overwrite=True,
         )
     except Exception as e:
-        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+        with open(f"{Path(nwbfile_path).parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
             f.write(traceback.format_exc())
         warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
