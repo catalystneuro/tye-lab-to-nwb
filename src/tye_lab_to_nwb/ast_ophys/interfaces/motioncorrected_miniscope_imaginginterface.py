@@ -78,13 +78,15 @@ class MotionCorrectedMiniscopeImagingInterface(BaseImagingExtractorInterface):
         reward_trials_indices: Optional[List[int]] = None,
     ):
         trial_frame_times = pd.DataFrame(self._timestamps_arr)
+        # the first three frame indices for each trial are NaNs
         trial_frame_times = trial_frame_times.dropna()
 
-        trial_frame_times_values = trial_frame_times.groupby(2).aggregate({4: ["min", "max"]}).values
-        # shift to zero because matlab starts from 1
-        trial_frame_times_values -= 1
+        # get the trial start and end frames (column 2 corresponds to trial index starting from 1, column 4 corresponds to frame indices starting from 1
+        trial_frame_indices = trial_frame_times.groupby(2).aggregate({4: ["min", "max"]}).values
+        # shift frame indices to zero because matlab starts from 1
+        trial_frame_indices -= 1
         # frame to time
-        trial_frame_times_values /= self.imaging_extractor.get_sampling_frequency()
+        trial_frame_times_values = trial_frame_indices / self.imaging_extractor.get_sampling_frequency()
 
         for trial_frame_times_value in trial_frame_times_values:
             nwbfile.add_trial(
