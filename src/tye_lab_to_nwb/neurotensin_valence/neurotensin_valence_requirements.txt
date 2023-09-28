@@ -1,4 +1,4 @@
--e git+https://github.com/catalystneuro/neuroconv@1357319ffe454fda82824dfec6af6d0f2854ed3f#egg=neuroconv
+-e git+https://github.com/catalystneuro/neuroconv@add_ignore_timestamps_errors_to_interface#egg=neuroconv
 neuroconv[openephys,plexon,video]
 ndx_pose>=0.1.1
 oiffile==2022.9.29
