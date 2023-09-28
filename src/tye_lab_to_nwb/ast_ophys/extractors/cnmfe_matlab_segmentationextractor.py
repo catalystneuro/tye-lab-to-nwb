@@ -1,3 +1,5 @@
+from encodings.utf_8 import decode
+
 import numpy as np
 from pymatreader import read_mat
 from roiextractors import SegmentationExtractor
@@ -23,6 +25,12 @@ class CnmfeMatlabSegmentationExtractor(SegmentationExtractor):
         self.file_path = file_path
 
         self._dataset_file = self._load_mat_file()
+
+        assert "C" in self._dataset_file, (
+            f"The fluorescence traces cannot be extracted from {self.file_path}."
+            "Make sure to run `save_neuron.m` in MATLAB to load the file that was produced by CNMF_E "
+            "and save the contents of the 'neuron' struct in a new .mat file that can be read by Python."
+        )
 
         self._sampling_frequency = float(self._dataset_file["Fs"])
         # image axis order should be height and width
