@@ -45,3 +45,28 @@ function save_neuron(CNMF_E_folder_path, source_filepath, destination_filepath)
 
 end
 ```
+
+# Run conversion for multiple sessions in parallel
+
+The `convert_all_sessions.py` conversion script takes an Excel (.xlsx) file as an input
+which contain all the necessary information to convert each session. The number of rows in the file
+correspond to the number of sessions that will be converted.
+
+The columns in the selected Excel (.xlsx) file should be named as:
+- "`miniscope_folder_path`" : The path that points to the folder where the raw Miniscope data is located (see description about folder structure above).
+- "`nwbfile_path`": The file path where the NWB file will be created. (e.g. "test.nwb")
+- "`processed_miniscope_avi_file_path`": The file path that points to the concatenated and first frames deleted "ffd" Miniscope video (.avi).
+- "`motion_corrected_mat_file_path`": The file path that points to the motion corrected Miniscope video (.mat).
+  - "`timestamps_mat_file_path`": The file path that points to the MATLAB file that contains the Miniscope and trial timings.
+        Required for the processed and motion corrected Miniscope data.
+- "`reward_trials_indices`": The list of trials that correspond to the CS-Reward trials.
+- "`segmentation_mat_file_path`": The file path that points to the MATLAB file containing the data structures from "neuron".
+- "`session_start_time`": For sessions where the raw Miniscope data is not available the recording start time must be provided.
+        The session_start_time should be in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00).
+
+Example with subject metadata columns (e.g. `subject_id`, `age`, `sex`, `genotype`, `strain`)
+
+| nwbfile_path      | miniscope_folder_path                   | processed_miniscope_avi_file_path | motion_corrected_mat_file_path | timestamps_mat_file_path | reward_trials_indices                                      | segmentation_mat_file_path | session_start_time      | subject_id | age | sex | genotype | strain   |
+|-------------------|-----------------------------------------|----------------------------------|-------------------------------|-------------------------|-------------------------------------------------------------|----------------------------|-------------------------|------------|-----|-----|----------|----------|
+| C6-J588-Disc5.nwb | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5 | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamAll_ffd.avi | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamComb_MC.mat | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_timestampsAllCumulData.mat |                                             | /Volumes/t7-ssd/Miniscope/neuron.mat  | 2023-08-21T15:30:00 | test       | P7D | M   |          |          |
+| test9.nwb         |                                         | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamAll_ffd.avi | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_msCamComb_MC.mat | /Volumes/t7-ssd/Miniscope/C6-J588_Disc5_timestampsAllCumulData.mat |                                             | /Volumes/t7-ssd/Miniscope/neuron.mat  | 2023-08-21T15:30:00 | test       | P7D | M   |          |          |
