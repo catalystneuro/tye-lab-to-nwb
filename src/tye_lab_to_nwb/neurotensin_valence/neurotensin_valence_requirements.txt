@@ -1,5 +1,6 @@
 -e git+https://github.com/catalystneuro/neuroconv@add_ignore_timestamps_errors_to_interface#egg=neuroconv
 neuroconv[openephys,plexon,video]
+git+https://github.com/neuralensemble/python-neo@master
 ndx_pose>=0.1.1
 oiffile==2022.9.29
 easydict>=1.10

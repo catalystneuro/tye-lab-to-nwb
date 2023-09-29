@@ -13,7 +13,7 @@ from neuroconv.utils import (
     FilePathType,
     FolderPathType,
 )
-from nwbinspector import inspect_nwb
+from nwbinspector import inspect_nwbfile
 from nwbinspector.inspector_tools import save_report, format_messages
 from packaging.version import Version
 
@@ -180,6 +180,7 @@ def session_to_nwb(
         session_start_time_dt = parser.parse(session_start_time)
         metadata["NWBFile"].update(session_start_time=session_start_time_dt)
 
+    nwbfile_path = Path(nwbfile_path)
     try:
         # Run conversion
         converter.run_conversion(
@@ -187,8 +188,7 @@ def session_to_nwb(
         )
 
         # Run inspection for nwbfile
-        nwbfile_path = Path(nwbfile_path)
-        results = list(inspect_nwb(nwbfile_path=nwbfile_path))
+        results = list(inspect_nwbfile(nwbfile_path=nwbfile_path))
         report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
         save_report(
             report_file_path=report_path,
