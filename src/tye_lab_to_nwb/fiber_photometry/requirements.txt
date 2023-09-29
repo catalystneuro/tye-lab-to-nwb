@@ -1,2 +1,4 @@
-git+https://github.com/catalystneuro/ndx-photometry
-ndx-events>=0.2.0
+neuroconv
+hdmf==3.6.1 # Pin until https://github.com/catalystneuro/ndx-photometry/issues/8 is resolved
+ndx-photometry==0.2.0
+ndx-events==0.2.0

@@ -1,7 +1,11 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from uuid import uuid4
 from zoneinfo import ZoneInfo
+
+from dateutil import tz
+from dateutil.parser import parse
 
 from neuroconv.utils import FilePathType, load_dict_from_file, dict_deep_update
 
@@ -9,11 +13,27 @@ from tye_lab_to_nwb.fiber_photometry import FiberPhotometryInterface
 
 
 def session_to_nwb(
-    file_path: FilePathType,
-    output_dir_path: FilePathType,
+    nwbfile_path: FilePathType,
+    data_file_path: FilePathType,
+    session_start_time: str,
+    subject_metadata: Optional[dict] = None,
 ):
+    """
+    Converts a single session to NWB.
+
+    Parameters
+    ----------
+    nwbfile_path : FilePathType
+        The file path to the NWB file that will be created.
+    data_file_path: FilePathType
+        The path that points to the .csv file containing the photometry intensity values.
+    session_start_time: str
+        The recording start time for the photometry session in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00).
+    """
+    nwbfile_path = Path(nwbfile_path)
+
     # Initalize interface with photometry source data
-    interface = FiberPhotometryInterface(file_path=str(file_path))
+    interface = FiberPhotometryInterface(file_path=str(data_file_path))
     # Update metadata from interface
     metadata = interface.get_metadata()
 
@@ -22,32 +42,45 @@ def session_to_nwb(
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    # Add datetime to conversion
+    if subject_metadata:
+        metadata = dict_deep_update(metadata, dict(Subject=subject_metadata))
+
+    # For data provenance we can add the time zone information to the conversion if missing
     if "session_start_time" not in metadata["NWBFile"]:
-        date = datetime(year=2020, month=1, day=1, tzinfo=ZoneInfo("US/Eastern"))  # TO-DO: Get this from author
-        metadata["NWBFile"].update(session_start_time=date)
-    # Generate subject identifier if missing from metadata
-    subject_id = "1"
-    if "subject_id" not in metadata["Subject"]:
-        metadata["Subject"].update(subject_id=subject_id)
-    session_id = str(uuid4())
+        if not session_start_time:
+            raise ValueError(
+                "The start time of the photometry session must be provided. "
+                "Use the 'session_start_time' keyword argument to provide in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00)."
+            )
+        session_start_time_dt = parse(session_start_time)
+        metadata["NWBFile"].update(session_start_time=session_start_time_dt)
+
+    tzinfo = tz.gettz("US/Pacific")
+    metadata["NWBFile"].update(session_start_time=metadata["NWBFile"]["session_start_time"].replace(tzinfo=tzinfo))
+
     if "session_id" not in metadata["NWBFile"]:
-        metadata["NWBFile"].update(session_id=session_id)
+        metadata["NWBFile"].update(session_id=nwbfile_path.stem)
 
-    output_dir_path = Path(output_dir_path) / f"sub-{metadata['Subject']['subject_id']}"
-    output_dir_path.mkdir(parents=True, exist_ok=True)
-    nwbfile_name = f"sub-{subject_id}_ses-{session_id}.nwb"
-    nwbfile_path = output_dir_path / nwbfile_name
-
-    interface.run_conversion(nwbfile_path=nwbfile_path, metadata=metadata)
+    interface.run_conversion(nwbfile_path=str(nwbfile_path), metadata=metadata, overwrite=True)
 
 
 if __name__ == "__main__":
     # Parameters for conversion
     photometry_file_path = Path("/Volumes/t7-ssd/Hao_NWB/recording/Photometry_data0.csv")
-    output_dir_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles")
+
+    # The file path where the NWB file will be created.
+    nwbfile_path = Path("/Volumes/t7-ssd/Hao_NWB/nwbfiles/photometry.nwb")
+
+    # The recording start time for the photometry session has to be provided manually
+    # in YYYY-MM-DDTHH:MM:SS format (e.g. 2023-08-21T15:30:00).
+    session_start_time = "2023-08-21T15:30:00"
+
+    # Provide the metadata for the subject ("U" is for unknown, "M" is for male, "F" is for female)
+    subject_metadata = dict(subject_id="H28", sex="U")
 
     session_to_nwb(
-        file_path=photometry_file_path,
-        output_dir_path=output_dir_path,
+        nwbfile_path=nwbfile_path,
+        data_file_path=photometry_file_path,
+        session_start_time=session_start_time,
+        subject_metadata=subject_metadata,
     )
