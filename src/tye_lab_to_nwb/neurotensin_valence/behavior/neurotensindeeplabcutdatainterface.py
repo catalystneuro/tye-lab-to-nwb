@@ -64,26 +64,9 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
             pickled = pickle.load(handle)
         return pickled
 
-    def get_original_timestamps(self) -> np.ndarray:
-        raise NotImplementedError(
-            "Unable to retrieve the original unaltered timestamps for this interface! "
-            "Define the `get_original_timestamps` method for this interface."
-        )
-
-    def get_timestamps(self) -> np.ndarray:
-        raise NotImplementedError(
-            "Unable to retrieve timestamps for this interface! Define the `get_timestamps` method for this interface."
-        )
-
-    def align_timestamps(self, aligned_timestamps: np.ndarray):
-        raise NotImplementedError(
-            "The protocol for synchronizing the timestamps of this interface has not been specified!"
-        )
-
-    def run_conversion(
+    def add_to_nwbfile(
         self,
-        nwbfile_path: OptionalFilePathType = None,
-        nwbfile: Optional[NWBFile] = None,
+        nwbfile: NWBFile,
         metadata: Optional[dict] = None,
         original_video_file_path: OptionalFilePathType = None,
         labeled_video_file_path: OptionalFilePathType = None,
@@ -93,60 +76,57 @@ class NeurotensinDeepLabCutInterface(BaseDataInterface):
         column_mappings: Optional[dict] = None,
         overwrite: bool = False,
     ):
-        with make_or_load_nwbfile(
-            nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
-        ) as nwbfile_out:
-            pose_estimation_data = self._load_source_data()
-            pose_estimation_kwargs_from_pickle = dict()
-            if self.config_file_path is not None:
-                pose_estimation_config = self._load_pickle()
-                rate = pose_estimation_config["data"]["fps"]
-                pose_estimation_kwargs_from_pickle = dict(
-                    scorer=pose_estimation_config["data"]["Scorer"],
-                    # frame_dimensions are in height x width, but for NWB it should be width x height
-                    dimensions=np.array([pose_estimation_config["data"]["frame_dimensions"][::-1]], dtype=np.uint16),
-                )
-
-            pose_estimation_metadata = metadata["PoseEstimation"]
-            assert (
-                rate is not None
-            ), "The 'rate' must be specified when the sampling frequency cannot be read from the configuration (.pickle) file."
-
-            pose_estimation_series = []
-            for column_name in pose_estimation_metadata:
-                pose_estimation_series_data = pose_estimation_data[column_name]
-
-                pose_estimation_series.append(
-                    PoseEstimationSeries(
-                        name=pose_estimation_metadata[column_name]["name"],
-                        description=pose_estimation_metadata[column_name]["description"],
-                        data=pose_estimation_series_data[["x", "y"]].values,
-                        unit="px",
-                        reference_frame="(0,0) corresponds to the top left corner of the cage.",
-                        rate=rate,
-                        starting_time=starting_time or 0.0,
-                        confidence=pose_estimation_series_data["likelihood"].values,
-                        confidence_definition=pose_estimation_metadata[column_name]["confidence_definition"],
-                    )
-                )
-
-            # The parameters for the pose estimation container
-            pose_estimation_kwargs = dict(
-                pose_estimation_series=pose_estimation_series,
-                source_software="DeepLabCut",
-                nodes=[pose_estimation_metadata[column_name]["name"] for column_name in pose_estimation_metadata],
-                **pose_estimation_kwargs_from_pickle,
+        pose_estimation_data = self._load_source_data()
+        pose_estimation_kwargs_from_pickle = dict()
+        if self.config_file_path is not None:
+            pose_estimation_config = self._load_pickle()
+            rate = pose_estimation_config["data"]["fps"]
+            pose_estimation_kwargs_from_pickle = dict(
+                scorer=pose_estimation_config["data"]["Scorer"],
+                # frame_dimensions are in height x width, but for NWB it should be width x height
+                dimensions=np.array([pose_estimation_config["data"]["frame_dimensions"][::-1]], dtype=np.uint16),
             )
 
-            if original_video_file_path is not None:
-                pose_estimation_kwargs.update(original_videos=[original_video_file_path])
-            if labeled_video_file_path is not None:
-                pose_estimation_kwargs.update(labeled_videos=[labeled_video_file_path])
-            if edges is not None:
-                pose_estimation_kwargs.update(edges=np.asarray(edges, dtype=np.uint8))
+        pose_estimation_metadata = metadata["PoseEstimation"]
+        assert (
+            rate is not None
+        ), "The 'rate' must be specified when the sampling frequency cannot be read from the configuration (.pickle) file."
 
-            # Create the container for pose estimation
-            pose_estimation = PoseEstimation(**pose_estimation_kwargs)
+        pose_estimation_series = []
+        for column_name in pose_estimation_metadata:
+            pose_estimation_series_data = pose_estimation_data[column_name]
 
-            behavior = get_module(nwbfile_out, "behavior", "Processed behavior data.")
-            behavior.add(pose_estimation)
+            pose_estimation_series.append(
+                PoseEstimationSeries(
+                    name=pose_estimation_metadata[column_name]["name"],
+                    description=pose_estimation_metadata[column_name]["description"],
+                    data=pose_estimation_series_data[["x", "y"]].values,
+                    unit="px",
+                    reference_frame="(0,0) corresponds to the top left corner of the cage.",
+                    rate=rate,
+                    starting_time=starting_time or 0.0,
+                    confidence=pose_estimation_series_data["likelihood"].values,
+                    confidence_definition=pose_estimation_metadata[column_name]["confidence_definition"],
+                )
+            )
+
+        # The parameters for the pose estimation container
+        pose_estimation_kwargs = dict(
+            pose_estimation_series=pose_estimation_series,
+            source_software="DeepLabCut",
+            nodes=[pose_estimation_metadata[column_name]["name"] for column_name in pose_estimation_metadata],
+            **pose_estimation_kwargs_from_pickle,
+        )
+
+        if original_video_file_path is not None:
+            pose_estimation_kwargs.update(original_videos=[original_video_file_path])
+        if labeled_video_file_path is not None:
+            pose_estimation_kwargs.update(labeled_videos=[labeled_video_file_path])
+        if edges is not None:
+            pose_estimation_kwargs.update(edges=np.asarray(edges, dtype=np.uint8))
+
+        # Create the container for pose estimation
+        pose_estimation = PoseEstimation(**pose_estimation_kwargs)
+
+        behavior = get_module(nwbfile, "behavior", "Processed behavior data.")
+        behavior.add(pose_estimation)
