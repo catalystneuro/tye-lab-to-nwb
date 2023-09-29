@@ -113,51 +113,38 @@ class NeurotensinConfocalImagesInterface(BaseDataInterface):
         metadata = dict_deep_update(metadata, metadata_from_oif_file)
         return metadata
 
-    def align_timestamps(self, aligned_timestamps: np.ndarray):
-        pass
-
-    def get_original_timestamps(self) -> np.ndarray:
-        pass
-
-    def get_timestamps(self) -> np.ndarray:
-        pass
-
-    def run_conversion(
+    def add_to_nwbfile(
         self,
-        nwbfile_path: Optional[str] = None,
-        nwbfile: Optional[NWBFile] = None,
+        nwbfile: NWBFile,
         metadata: Optional[dict] = None,
         conversion_options: Optional[dict] = None,
         overwrite: bool = False,
     ):
-        with make_or_load_nwbfile(
-            nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
-        ) as nwbfile_out:
-            images = Images(name=metadata["Images"]["name"], description=metadata["Images"]["description"])
-            file_list = list(self.oif.series[0])
+        images = Images(name=metadata["Images"]["name"], description=metadata["Images"]["description"])
+        file_list = list(self.oif.series[0])
 
-            for file_ind, file in enumerate(file_list):
-                image = self.oif.series[0].imread(file)
-                image_metadata = metadata["Images"]["images"][file_ind]
+        for file_ind, file in enumerate(file_list):
+            image = self.oif.series[0].imread(file)
+            image_metadata = metadata["Images"]["images"][file_ind]
 
+            images.add_image(
+                GrayscaleImage(
+                    name=image_metadata["name"],
+                    data=H5DataIO(image.T, compression=True),
+                    description=image_metadata["description"],
+                )
+            )
+
+        # Add composite images
+        if self.composite_images is not None:
+            for image_ind in range(self.composite_images.shape[0]):
+                image_metadata = metadata["Images"]["images"][len(file_list) + image_ind]
                 images.add_image(
                     GrayscaleImage(
                         name=image_metadata["name"],
-                        data=H5DataIO(image.T, compression=True),
+                        data=H5DataIO(self.composite_images[image_ind].T, compression=True),
                         description=image_metadata["description"],
                     )
                 )
 
-            # Add composite images
-            if self.composite_images is not None:
-                for image_ind in range(self.composite_images.shape[0]):
-                    image_metadata = metadata["Images"]["images"][len(file_list) + image_ind]
-                    images.add_image(
-                        GrayscaleImage(
-                            name=image_metadata["name"],
-                            data=H5DataIO(self.composite_images[image_ind].T, compression=True),
-                            description=image_metadata["description"],
-                        )
-                    )
-
-            nwbfile_out.add_acquisition(images)
+        nwbfile.add_acquisition(images)
