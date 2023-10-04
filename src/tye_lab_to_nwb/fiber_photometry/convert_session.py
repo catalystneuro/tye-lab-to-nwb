@@ -8,6 +8,8 @@ from dateutil import tz
 from dateutil.parser import parse
 
 from neuroconv.utils import FilePathType, load_dict_from_file, dict_deep_update
+from nwbinspector import inspect_nwbfile
+from nwbinspector.inspector_tools import save_report, format_messages
 
 from tye_lab_to_nwb.fiber_photometry import FiberPhotometryInterface
 
@@ -61,7 +63,24 @@ def session_to_nwb(
     if "session_id" not in metadata["NWBFile"]:
         metadata["NWBFile"].update(session_id=nwbfile_path.stem)
 
-    interface.run_conversion(nwbfile_path=str(nwbfile_path), metadata=metadata, overwrite=True)
+    try:
+        interface.run_conversion(nwbfile_path=str(nwbfile_path), metadata=metadata, overwrite=True)
+
+        # Run inspection for nwbfile
+        results = list(inspect_nwbfile(nwbfile_path=nwbfile_path))
+        report_path = nwbfile_path.parent / f"{nwbfile_path.stem}_inspector_result.txt"
+        save_report(
+            report_file_path=report_path,
+            formatted_messages=format_messages(
+                results,
+                levels=["importance", "file_path"],
+            ),
+            overwrite=True,
+        )
+    except Exception as e:
+        with open(f"{nwbfile_path.parent}/{nwbfile_path.stem}_error_log.txt", "w") as f:
+            f.write(traceback.format_exc())
+        warn(f"There was an error during the conversion of {nwbfile_path}. The full traceback: {e}")
 
 
 if __name__ == "__main__":
