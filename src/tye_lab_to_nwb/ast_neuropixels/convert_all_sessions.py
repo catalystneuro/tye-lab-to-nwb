@@ -28,7 +28,7 @@ def parallel_convert_sessions(
         Default is to write the whole ecephys recording and plexon data to the file.
     """
 
-    config = read_session_config(excel_file_path=excel_file_path, required_column_name="neuropixels_file_path")
+    config = read_session_config(excel_file_path=excel_file_path)
 
     kwargs_list = []
     for row_ind, row in config.iterrows():

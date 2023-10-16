@@ -1,4 +1,4 @@
--e git+https://github.com/catalystneuro/neuroconv@main#egg=neuroconv
+git+https://github.com/catalystneuro/neuroconv.git@36fe8ba02c036e715a915ee66079391a50536fb2#egg=neuroconv
 neuroconv[spikeglx,phy]
 tifffile>=2023.3.21
 openpyxl>=3.1.2

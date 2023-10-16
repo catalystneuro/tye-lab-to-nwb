@@ -129,7 +129,7 @@ if __name__ == "__main__":
     # The path to the Excel (.xlsx) file that contains the file paths for each data stream.
     # The number of rows in the file corresponds to the number of sessions that can be converted.
     excel_file_path = Path("/Volumes/t7-ssd/Raw_NPX/session_config.xlsx")
-    config = read_session_config(excel_file_path=excel_file_path, required_column_name="neuropixels_file_path")
+    config = read_session_config(excel_file_path=excel_file_path)
     # Choose which session will be converted by specifying the index of the row
     row_index = 0
 
