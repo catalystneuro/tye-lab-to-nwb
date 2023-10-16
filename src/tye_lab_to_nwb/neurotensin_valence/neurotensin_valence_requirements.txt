@@ -1,5 +1,6 @@
--e git+https://github.com/catalystneuro/neuroconv@1357319ffe454fda82824dfec6af6d0f2854ed3f#egg=neuroconv
+git+https://github.com/catalystneuro/neuroconv.git@36fe8ba02c036e715a915ee66079391a50536fb2#egg=neuroconv
 neuroconv[openephys,plexon,video]
+git+https://github.com/neuralensemble/python-neo@master
 ndx_pose>=0.1.1
 oiffile==2022.9.29
 easydict>=1.10

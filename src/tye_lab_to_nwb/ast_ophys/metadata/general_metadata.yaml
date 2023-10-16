@@ -1,0 +1,39 @@
+NWBFile:
+  experiment_description: |
+    In order to respond appropriately to threats in the environment, the brain must rapidly
+    determine whether a stimulus is important and whether it is positive or negative, and then
+    use that information to direct behavioral responses. Neurons in the amygdala have long been
+    implicated in valence encoding and in fear responses to threatening stimuli, but show transient
+    firing responses in response to these stimuli that do not match the timescales of associated
+    behavioral responses. For decades, there has been a logical gap in how behavioral responses
+    could be mediated without an ensemble representation of the internal state of valence that
+    has rapid onset, high signal-to-noise, and is sustained for the duration of the behavioral state.
+    Here, we present the amygdalostriatal transition zone (ASt) as a missing piece of this highly
+    conserved process that is of paramount importance for survival, which does exactly this: represents
+    an internal state (e.g. fear) that can be expressed in multiple motor outputs (e.g. freezing or escape).
+    The ASt is anatomically positioned as a “shortcut” to connect the corticolimbic system (important for
+    evaluation) with the basal ganglia (important for action selection) with the inputs of the amygdala
+    and the outputs of the striatum – ideally poised for evaluating and responding to environmental threats.
+    From in vivo cellular resolution recordings that include both electrophysiology and calcium imaging,
+    we find that ASt neurons are unique in that they are sparse coding, extremely high signal-to-noise,
+    and also maintain a sustained response for negative valence stimuli for the duration of the defensive
+    behavior – a rare but essential combination. We further show that photostimulation of the ASt is
+    sufficient to drive freezing and avoidance behaviors. Using single-nucleus RNA sequencing and in
+    situ RNA labelling we generate a comprehensive profile of cell types and gene expression in the ASt,
+    and find the ASt is genetically distinct from adjacent striatal and amygdalar structures.
+    We also find that the ASt has a greater proportion of neurons expressing Drd2 than neurons
+    expressing Drd1a, a unique feature compared to other regions of the striatum.
+    Using in vivo calcium imaging, we show that that this Drd2+ population robustly encodes stimuli of
+    negative valence, and in loss-of-function experiments find that optogenetic inhibition of Drd2+ ASt
+    neurons causes a striking reduction in cue-conditioned fear responses. Together, our findings
+    identify the ASt as a previously-unappreciated critical missing link for encoding learned associations
+    and directing ongoing behavior.
+
+  institution: Salk Institute for Biological Studies
+  lab: Tye
+  experimenter:
+    - Mills, Fergil
+  related_publications:
+    - https://doi.org/10.1101/2022.10.28.514263
+Subject:
+  species: Mus musculus
