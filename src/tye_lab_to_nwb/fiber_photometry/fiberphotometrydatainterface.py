@@ -87,18 +87,12 @@ class FiberPhotometryInterface(BaseDataInterface):
         """
         self.photometry_dataframe[column] = aligned_timestamps
 
-    def run_conversion(
+    def add_to_nwbfile(
         self,
-        nwbfile_path: OptionalFilePathType = None,
-        nwbfile: Optional[NWBFile] = None,
+        nwbfile: NWBFile,
         metadata: Optional[dict] = None,
         stub_test: bool = False,
         overwrite: bool = False,
     ):
-        with make_or_load_nwbfile(
-            nwbfile_path=nwbfile_path, nwbfile=nwbfile, metadata=metadata, overwrite=overwrite, verbose=self.verbose
-        ) as nwbfile_out:
-            add_events_from_photometry(
-                photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile_out, metadata=metadata
-            )
-            add_photometry(photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile_out, metadata=metadata)
+        add_events_from_photometry(photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile, metadata=metadata)
+        add_photometry(photometry_dataframe=self.photometry_dataframe, nwbfile=nwbfile, metadata=metadata)
