@@ -1,6 +1,5 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
 import traceback
-from importlib.metadata import version
 from pathlib import Path
 from typing import Optional, Dict
 from warnings import warn
@@ -15,7 +14,6 @@ from neuroconv.utils import (
 )
 from nwbinspector import inspect_nwbfile
 from nwbinspector.inspector_tools import save_report, format_messages
-from packaging.version import Version
 
 from tye_lab_to_nwb.neurotensin_valence import NeurotensinValenceNWBConverter
 
@@ -74,8 +72,6 @@ def session_to_nwb(
     # Add Recording
     if ecephys_recording_folder_path:
         recording_source_data = dict(folder_path=str(ecephys_recording_folder_path), stream_name="Signals CH")
-        if Version(version("neo")) > Version("0.12.0"):
-            recording_source_data.update(ignore_timestamps_errors=True)
 
         source_data.update(dict(Recording=recording_source_data))
         conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
