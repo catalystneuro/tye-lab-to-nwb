@@ -1,4 +1,5 @@
 """Primary class for converting experiment-specific behavior."""
+
 import pickle
 from pathlib import Path
 from typing import Optional

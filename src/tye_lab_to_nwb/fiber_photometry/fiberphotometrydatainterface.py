@@ -1,4 +1,5 @@
 """Primary class for converting fiber photometry data."""
+
 from pathlib import Path
 from typing import Optional
 

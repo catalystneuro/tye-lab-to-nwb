@@ -44,9 +44,9 @@ def parallel_convert_sessions(
                 processed_miniscope_avi_file_path=row["processed_miniscope_avi_file_path"],
                 motion_corrected_mat_file_path=row["motion_corrected_mat_file_path"],
                 timestamps_mat_file_path=row["timestamps_mat_file_path"],
-                reward_trials_indices=ast.literal_eval(row["reward_trials_indices"])
-                if row["reward_trials_indices"]
-                else None,
+                reward_trials_indices=(
+                    ast.literal_eval(row["reward_trials_indices"]) if row["reward_trials_indices"] else None
+                ),
                 segmentation_mat_file_path=row["segmentation_mat_file_path"],
                 session_start_time=row["session_start_time"],
                 subject_metadata=subject_metadata,
