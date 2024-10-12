@@ -36,7 +36,13 @@ class CnmfeMatlabSegmentationExtractor(SegmentationExtractor):
         # image axis order should be height and width
         self._image_size = (self._dataset_file["options"]["d1"], self._dataset_file["options"]["d2"])
         self._num_frames = self._dataset_file["P"]["numFrames"]
-        self._roi_response_raw = self._dataset_file["C"].T
+
+        roi_response_raw = self._dataset_file["C"]
+        # For single roi data insert new axis
+        if len(roi_response_raw.shape) == 1:
+            roi_response_raw = roi_response_raw[np.newaxis, :]
+    
+        self._roi_response_raw = roi_response_raw.T
         self._roi_response_deconvolved = self._transform_deconvolved_traces()
         self._image_correlation = self._dataset_file["Cn"]
         self._image_masks = self._transform_image_masks()
